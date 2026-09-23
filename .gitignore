@@ -1,0 +1,43 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+
+# Environment
+.env.*
+!.env.example
+
+# Google OAuth credentials
+client_secret*.json
+
+# Laravel
+/vendor/
+/node_modules/
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+
+# IDE
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/.phpactor.json
+
+# PHPUnit
+/.phpunit.result.cache
+
+# Composer authentication
+/auth.json
+
+# OS
+Thumbs.db
+
+# Laravel Homestead
+Homestead.json
+Homestead.yaml

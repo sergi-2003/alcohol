@@ -1,0 +1,14 @@
+*
+!.gitignore
+# Google OAuth credentials
+client_secret*.json
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Laravel
+/vendor/
+/node_modules/
+/storage/*.key
