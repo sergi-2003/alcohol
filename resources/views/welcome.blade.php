@@ -145,6 +145,190 @@
             transform: translateY(-2px);
         }
 
+        /* =========================
+   BANNER
+========================= */
+
+.hero {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #dff4ff;
+}
+
+.banner-img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* =========================
+   BOTÓN QUIERO CONOCER
+========================= */
+
+.btn-comenzar {
+    position: absolute;
+
+    left: 50%;
+    bottom: 12%;
+
+    transform: translateX(-50%);
+
+    z-index: 20;
+
+    min-width: 300px;
+
+    padding: 14px 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    background: #FACC11;
+    color: #ffffff;
+
+    border: 4px solid rgba(255,255,255,.90);
+    border-radius: 60px;
+
+    font-size: 24px;
+    font-weight: 900;
+
+    text-decoration: none;
+
+    box-shadow:
+        0 7px 0 rgba(0,0,0,.12),
+        0 12px 25px rgba(0,0,0,.20);
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        filter .2s ease;
+}
+
+.btn-comenzar:hover {
+    color: #ffffff;
+
+    transform:
+        translateX(-50%)
+        translateY(-3px);
+
+    filter: brightness(1.05);
+
+    box-shadow:
+        0 10px 0 var(--verde-oscuro),
+        0 15px 28px rgba(0,0,0,.22);
+}
+
+.btn-comenzar i {
+    font-size: 18px;
+    transition: transform .2s ease;
+}
+
+.btn-comenzar:hover i {
+    transform: translateX(4px);
+}
+
+/* =========================
+   CURVA DEL BANNER
+========================= */
+
+.hero::after {
+    content: "";
+
+    position: absolute;
+
+    left: -5%;
+    bottom: -80px;
+
+    width: 110%;
+    height: 145px;
+
+    background: #fff;
+
+    border-radius:
+        50% 50% 0 0 /
+        100% 100% 0 0;
+
+    z-index: 5;
+
+    pointer-events: none;
+}
+
+/* =========================
+   TABLET
+========================= */
+
+@media (max-width: 900px) {
+
+    .btn-comenzar {
+        min-width: 260px;
+        padding: 12px 27px;
+        font-size: 20px;
+        bottom: 10%;
+    }
+
+    .btn-comenzar i {
+        font-size: 16px;
+    }
+}
+
+/* =========================
+   MÓVIL
+========================= */
+
+@media (max-width: 768px) {
+
+    .banner-img {
+        width: 100%;
+        height: auto;
+    }
+
+    .btn-comenzar {
+        min-width: 230px;
+
+        padding: 10px 22px;
+
+        font-size: 17px;
+
+        border-width: 3px;
+
+        bottom: 9%;
+
+        gap: 8px;
+    }
+
+    .btn-comenzar i {
+        font-size: 14px;
+    }
+
+    .hero::after {
+        bottom: -52px;
+        height: 95px;
+    }
+}
+
+/* =========================
+   CELULAR PEQUEÑO
+========================= */
+
+@media (max-width: 480px) {
+
+    .btn-comenzar {
+        min-width: 210px;
+
+        padding: 9px 18px;
+
+        font-size: 15px;
+
+        bottom: 8%;
+    }
+
+    .btn-comenzar i {
+        font-size: 13px;
+    }
+}
+
         .mobile-menu-btn {
             display: none;
             width: 44px;
@@ -2298,7 +2482,1322 @@
                 height: 54px;
             }
         }
-    </style>
+    
+        /* =========================
+           CORRECCIONES FINALES
+        ========================= */
+
+        .hero-banner-picture {
+            display: block;
+            width: 100%;
+            line-height: 0;
+        }
+
+        .hero-banner-picture img {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner-picture,
+            .hero-banner-picture img {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+            }
+
+            .hero::after {
+                bottom: -42px;
+                height: 75px;
+            }
+
+            .navbar-custom {
+                min-height: 68px;
+            }
+
+            .mobile-menu {
+                top: 68px;
+                margin-top: 0;
+            }
+
+            .missions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mission-card {
+                min-height: 92px;
+                grid-template-columns: 70px minmax(0, 1fr) 42px;
+                grid-template-rows: auto auto auto;
+            }
+
+            .mission-btn {
+                width: 42px;
+                height: 42px;
+                min-height: 42px;
+                padding: 0;
+            }
+
+            .final-banner {
+                width: 100%;
+                margin-top: 100px;
+                padding: 30px 18px 22px;
+            }
+
+            .final-avatar {
+                left: 50%;
+                top: -105px;
+                bottom: auto;
+                transform: translateX(-50%);
+            }
+
+            .final-content {
+                width: 100%;
+                margin-right: 0;
+                text-align: center;
+            }
+
+            .final-button {
+                width: 100%;
+            }
+
+            .education-modal {
+                padding: 12px;
+            }
+
+            .education-modal-box {
+                width: 100%;
+                max-height: 90vh;
+                padding: 26px 20px 22px;
+                border-radius: 22px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .como-title,
+            .section-title,
+            .aprende-title {
+                font-size: 27px;
+            }
+
+            .mission-card {
+                grid-template-columns: 60px minmax(0, 1fr) 40px;
+                column-gap: 9px;
+                padding: 9px;
+            }
+
+            .mission-icon {
+                width: 58px;
+                height: 58px;
+                font-size: 26px;
+            }
+
+            .mission-card h3 {
+                font-size: 14px;
+            }
+
+            .mission-card p {
+                font-size: 11px;
+            }
+
+            .final-content h2 {
+                font-size: 20px;
+            }
+        }
+
+    
+/* =========================================================
+   RESPONSIVE FINAL — MI DECISIÓN
+   ========================================================= */
+
+html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+}
+
+img, picture, video, iframe {
+    max-width: 100%;
+}
+
+.hero-banner-picture {
+    display: block;
+    width: 100%;
+    line-height: 0;
+}
+
+.hero-banner-picture img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+/* El CTA antiguo del banner queda eliminado */
+
+
+/* ---------- TABLET ---------- */
+@media (max-width: 991.98px) {
+    .navbar-custom {
+        min-height: 70px;
+        padding: 10px 22px;
+    }
+
+    .navbar-desktop {
+        gap: 14px;
+    }
+
+    .pasos-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px 15px;
+    }
+
+    .pasos-grid::before {
+        display: none;
+    }
+
+    .missions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .final-banner {
+        padding-left: 230px;
+    }
+
+    .final-avatar {
+        width: 220px;
+    }
+
+    .final-avatar img {
+        width: 220px;
+        height: 220px;
+    }
+}
+
+/* ---------- MÓVIL ---------- */
+@media (max-width: 767.98px) {
+
+    body {
+        font-size: 15px;
+    }
+
+    .navbar-custom {
+        min-height: 66px;
+        padding: 8px 16px;
+    }
+
+    .navbar-inner {
+        min-width: 0;
+    }
+
+    .navbar-desktop {
+        display: none !important;
+    }
+
+    .mobile-menu-btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .mobile-menu {
+        top: 66px;
+        margin-top: 0;
+        z-index: 9999;
+        max-height: calc(100vh - 66px);
+        overflow-y: auto;
+    }
+
+    /* Banner móvil: usa banner-mobile.webp */
+    .hero {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .hero-banner-picture {
+        display: block;
+        width: 100%;
+    }
+
+    .hero-banner-picture img {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-width: 0;
+        object-fit: cover;
+    }
+
+    .hero::after {
+        left: -8%;
+        bottom: -35px;
+        width: 116%;
+        height: 65px;
+    }
+
+    /* COMO FUNCIONA */
+    .como-funciona {
+        padding: 52px 16px 55px;
+    }
+
+    .como-title,
+    .section-title {
+        font-size: clamp(26px, 7vw, 34px);
+        line-height: 1.1;
+    }
+
+    .como-title::before,
+    .como-title::after,
+    .section-title::before,
+    .section-title::after {
+        margin: 0 6px;
+    }
+
+    .como-subtitle,
+    .section-description {
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 30px;
+    }
+
+    .pasos-grid {
+        grid-template-columns: 1fr;
+        gap: 26px;
+    }
+
+    .paso {
+        padding: 0 8px;
+    }
+
+    .paso-icon {
+        width: 78px;
+        height: 78px;
+        font-size: 31px;
+        border-width: 5px;
+    }
+
+    .paso h3 {
+        font-size: 18px;
+    }
+
+    .paso p {
+        max-width: 320px;
+        font-size: 13px;
+    }
+
+    .como-frase {
+        margin-top: 30px;
+        padding: 14px 17px;
+        font-size: 14px;
+        line-height: 1.45;
+    }
+
+    /* MISIONES */
+    .missions-section {
+        padding: 50px 14px 60px;
+        margin-top: -35px;
+    }
+
+    .missions-container {
+        width: 100%;
+    }
+
+    .missions-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px;
+    }
+
+    .mission-card {
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        height: auto;
+        display: grid;
+        grid-template-columns: 64px minmax(0, 1fr) 42px;
+        grid-template-rows: auto auto auto;
+        column-gap: 11px;
+        align-items: center;
+        text-align: left;
+        padding: 13px 12px;
+        border-radius: 20px;
+    }
+
+    .mission-icon {
+        grid-column: 1;
+        grid-row: 1 / 4;
+        width: 58px;
+        height: 58px;
+        margin: 0;
+        font-size: 27px;
+    }
+
+    .mission-number {
+        grid-column: 2;
+        grid-row: 1;
+        margin: 0 0 2px;
+        font-size: 11px;
+    }
+
+    .mission-card h3 {
+        grid-column: 2;
+        grid-row: 2;
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.2;
+    }
+
+    .mission-card p {
+        grid-column: 2;
+        grid-row: 3;
+        min-height: 0;
+        margin: 5px 0 0;
+        font-size: 11.5px;
+        line-height: 1.35;
+    }
+
+    .mission-btn {
+        grid-column: 3;
+        grid-row: 1 / 4;
+        width: 42px;
+        min-width: 42px;
+        height: 42px;
+        min-height: 42px;
+        padding: 0;
+        border-radius: 13px;
+        align-self: center;
+    }
+
+    .mission-btn span {
+        display: none;
+    }
+
+    .mission-btn .explore-arrow {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+
+    /* BANNER FINAL */
+    .final-banner {
+        width: calc(100% - 24px);
+        margin: 95px auto 25px;
+        min-height: 0;
+        padding: 105px 18px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        border-radius: 22px;
+    }
+
+    .final-avatar {
+        position: absolute;
+        left: 50%;
+        top: -92px;
+        bottom: auto;
+        width: 190px;
+        height: 190px;
+        transform: translateX(-50%);
+    }
+
+    .final-avatar img {
+        width: 190px;
+        height: 190px;
+        transform: translateY(0);
+    }
+
+    .final-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        margin: 0;
+    }
+
+    .final-icon {
+        width: 56px;
+        height: 56px;
+        flex-basis: 56px;
+        font-size: 22px;
+    }
+
+    .final-content-text {
+        width: 100%;
+    }
+
+    .final-content h2 {
+        font-size: 19px;
+        line-height: 1.2;
+    }
+
+    .final-content p {
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .final-button {
+        width: 100%;
+        justify-content: center;
+        padding: 13px 16px;
+        border-radius: 17px;
+        font-size: 14px;
+    }
+
+    .final-button i {
+        font-size: 25px;
+    }
+
+    /* MODALES */
+    .education-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        overflow-y: auto;
+    }
+
+    .education-modal.active {
+        display: flex;
+    }
+
+    .education-modal-box {
+        width: min(100%, 520px);
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 25px 18px 20px;
+        border-radius: 22px;
+    }
+
+    .education-modal-close {
+        top: 10px;
+        right: 10px;
+    }
+
+    #modalTitle {
+        font-size: 24px;
+        line-height: 1.15;
+        padding-right: 30px;
+    }
+
+    .modal-intro,
+    #modalBlockText,
+    #modalReflection {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+}
+
+/* ---------- MÓVIL PEQUEÑO ---------- */
+@media (max-width: 480px) {
+
+    .navbar-custom {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .mobile-menu-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 22px;
+    }
+
+    .hero::after {
+        bottom: -26px;
+        height: 50px;
+    }
+
+    .como-funciona {
+        padding-top: 42px;
+    }
+
+    .missions-section {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .mission-card {
+        grid-template-columns: 56px minmax(0, 1fr) 38px;
+        column-gap: 8px;
+        padding: 11px 9px;
+    }
+
+    .mission-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 24px;
+    }
+
+    .mission-card h3 {
+        font-size: 14px;
+    }
+
+    .mission-card p {
+        font-size: 11px;
+    }
+
+    .mission-btn {
+        width: 38px;
+        min-width: 38px;
+        height: 38px;
+        min-height: 38px;
+    }
+
+    .final-banner {
+        width: calc(100% - 18px);
+        margin-top: 88px;
+        padding-top: 95px;
+    }
+
+    .final-avatar,
+    .final-avatar img {
+        width: 175px;
+        height: 175px;
+    }
+}
+
+/* ---------- MÓVIL MUY PEQUEÑO ---------- */
+@media (max-width: 360px) {
+
+    .mission-card {
+        grid-template-columns: 50px minmax(0, 1fr) 36px;
+        column-gap: 7px;
+        padding: 9px 7px;
+    }
+
+    .mission-icon {
+        width: 47px;
+        height: 47px;
+        font-size: 21px;
+    }
+
+    .mission-card h3 {
+        font-size: 13px;
+    }
+
+    .mission-card p {
+        font-size: 10.5px;
+    }
+
+    .mission-btn {
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
+        min-height: 36px;
+    }
+
+    .final-content h2 {
+        font-size: 18px;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE FINAL INTEGRADO — MI DECISIÓN
+   ========================================================= */
+
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+}
+
+img,
+picture,
+video,
+iframe {
+    max-width: 100%;
+}
+
+.hero {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.hero-banner-picture {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+}
+
+.hero-banner-picture img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+}
+
+/* El botón antiguo del banner ya no se utiliza */
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+
+    .navbar-custom {
+        padding: 9px 22px;
+    }
+
+    .navbar-desktop {
+        gap: 15px;
+    }
+
+    .pasos-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 25px 15px;
+    }
+
+    .pasos-grid::before {
+        display: none;
+    }
+
+    .missions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .final-banner {
+        padding-left: 220px;
+    }
+
+    .final-avatar {
+        width: 215px;
+    }
+
+    .final-avatar img {
+        width: 215px;
+        height: 215px;
+    }
+}
+
+/* =========================================================
+   MÓVIL
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    body {
+        font-size: 15px;
+    }
+
+    .navbar-custom {
+        min-height: 68px;
+        padding: 8px 15px;
+    }
+
+    .navbar-inner {
+        min-width: 0;
+    }
+
+    .navbar-desktop {
+        display: none !important;
+    }
+
+    .mobile-menu-btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .mobile-menu {
+        top: 68px;
+        left: 0;
+        margin-top: 0 !important;
+        width: 100%;
+        max-height: calc(100vh - 68px);
+        overflow-y: auto;
+        z-index: 9999;
+    }
+
+    /* -------------------------
+       BANNER MÓVIL
+       ------------------------- */
+
+    .hero {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .hero-banner-picture {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    .hero-banner-picture img {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        min-width: 0;
+        object-fit: contain;
+    }
+
+    .hero::after {
+        left: -8%;
+        bottom: -35px;
+        width: 116%;
+        height: 65px;
+    }
+
+    /* -------------------------
+       COMO FUNCIONA
+       ------------------------- */
+
+    .como-funciona {
+        padding: 52px 16px 55px;
+    }
+
+    .como-title,
+    .section-title,
+    .aprende-title {
+        font-size: clamp(26px, 7vw, 34px);
+        line-height: 1.12;
+    }
+
+    .como-title::before,
+    .como-title::after,
+    .section-title::before,
+    .section-title::after,
+    .aprende-title::before,
+    .aprende-title::after {
+        margin: 0 5px;
+    }
+
+    .como-subtitle,
+    .section-description,
+    .aprende-subtitle {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .pasos-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .paso {
+        display: grid;
+        grid-template-columns: 72px minmax(0, 1fr);
+        grid-template-rows: auto auto auto;
+        column-gap: 13px;
+        align-items: center;
+        text-align: left;
+        padding: 5px 6px;
+    }
+
+    .paso-icon {
+        grid-column: 1;
+        grid-row: 1 / 4;
+        width: 68px;
+        height: 68px;
+        margin: 0;
+        font-size: 27px;
+        border-width: 5px;
+    }
+
+    .paso-numero {
+        grid-column: 2;
+        grid-row: 1;
+        margin: 0;
+        font-size: 11px;
+    }
+
+    .paso h3 {
+        grid-column: 2;
+        grid-row: 2;
+        margin: 1px 0 3px;
+        font-size: 17px;
+    }
+
+    .paso p {
+        grid-column: 2;
+        grid-row: 3;
+        max-width: none;
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.35;
+    }
+
+    .como-frase {
+        margin-top: 28px;
+        padding: 14px 15px;
+        font-size: 14px;
+        line-height: 1.45;
+    }
+
+    /* -------------------------
+       MISIONES
+       ------------------------- */
+
+    .missions-section {
+        padding: 50px 12px 65px;
+        margin-top: -35px;
+    }
+
+    .missions-grid {
+        grid-template-columns: 1fr !important;
+        gap: 11px;
+        max-width: 540px;
+        margin: 0 auto;
+    }
+
+    .mission-card {
+        width: 100%;
+        min-width: 0;
+        min-height: 0;
+        height: auto;
+
+        display: grid;
+        grid-template-columns: 62px minmax(0, 1fr) 42px;
+        grid-template-rows: auto auto auto;
+        column-gap: 10px;
+
+        align-items: center;
+        text-align: left;
+
+        padding: 12px 10px;
+        border-radius: 18px;
+    }
+
+    .mission-icon {
+        grid-column: 1;
+        grid-row: 1 / 4;
+
+        width: 56px;
+        height: 56px;
+
+        margin: 0;
+        font-size: 25px;
+    }
+
+    .mission-number {
+        grid-column: 2;
+        grid-row: 1;
+
+        margin: 0 0 2px;
+        font-size: 11px;
+    }
+
+    .mission-card h3 {
+        grid-column: 2;
+        grid-row: 2;
+
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.2;
+    }
+
+    .mission-card p {
+        grid-column: 2;
+        grid-row: 3;
+
+        min-height: 0;
+        margin: 5px 0 0;
+
+        font-size: 11.5px;
+        line-height: 1.35;
+    }
+
+    .mission-btn {
+        grid-column: 3;
+        grid-row: 1 / 4;
+
+        width: 42px;
+        min-width: 42px;
+        height: 42px;
+        min-height: 42px;
+
+        padding: 0;
+        border-radius: 13px;
+    }
+
+    .mission-btn span {
+        display: none;
+    }
+
+    .mission-btn .explore-arrow {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+
+    /* -------------------------
+       CONTENIDO EDUCATIVO
+       ------------------------- */
+
+    .aprende-section {
+        padding: 55px 15px 65px;
+    }
+
+    .educational-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px;
+    }
+
+    .educational-card {
+        min-height: auto;
+        padding: 21px 18px;
+        border-radius: 21px;
+    }
+
+    .educational-icon {
+        width: 57px;
+        height: 57px;
+        font-size: 24px;
+    }
+
+    .educational-card h3 {
+        font-size: 18px;
+        line-height: 1.2;
+    }
+
+    .educational-card p {
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .educational-open,
+    .educational-open1 {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        min-height: 44px;
+        padding: 11px 13px;
+        font-size: 13px;
+        line-height: 1.25;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .educational-highlight {
+        margin-top: 25px;
+        padding: 18px;
+        gap: 13px;
+    }
+
+    /* -------------------------
+       SECCIÓN ¿POR QUÉ?
+       ------------------------- */
+
+    .why-alcohol {
+        padding: 65px 15px;
+        overflow: hidden;
+    }
+
+    .why-header h2 {
+        font-size: clamp(30px, 9vw, 38px);
+        line-height: 1.08;
+    }
+
+    .why-header p {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .why-scene {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-height: auto;
+    }
+
+    .why-circle {
+        display: none;
+    }
+
+    .why-character {
+        order: 1;
+        width: 100%;
+        height: 330px;
+        margin-bottom: 10px;
+    }
+
+    .character-circle {
+        width: 240px;
+        height: 240px;
+    }
+
+    .why-character img {
+        width: 240px;
+        height: 320px;
+    }
+
+    .character-bubble {
+        right: 15px;
+        top: 0;
+    }
+
+    .why-card {
+        width: 100% !important;
+        margin: 0;
+    }
+
+    .why-card-one { order: 2; }
+    .why-card-two { order: 3; }
+    .why-card-three { order: 4; }
+    .why-card-four { order: 5; }
+    .why-card-bottom { order: 6; }
+
+    .why-final {
+        margin-top: 25px;
+        padding: 20px;
+        align-items: flex-start;
+    }
+
+    /* -------------------------
+       BANNER FINAL / #141
+       ------------------------- */
+
+    .final-banner {
+        width: calc(100% - 20px);
+        margin: 95px auto 25px;
+
+        min-height: 0;
+        padding: 100px 17px 20px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+
+        border-radius: 22px;
+        overflow: visible;
+    }
+
+    .final-avatar {
+        position: absolute;
+
+        left: 50%;
+        top: -92px;
+        bottom: auto;
+
+        width: 180px;
+        height: 180px;
+
+        transform: translateX(-50%);
+    }
+
+    .final-avatar img {
+        width: 180px;
+        height: 180px;
+        transform: translateY(0);
+    }
+
+    .final-content {
+        width: 100%;
+        margin-right: 0;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+
+        text-align: center;
+    }
+
+    .final-content h2 {
+        font-size: 20px;
+        line-height: 1.2;
+    }
+
+    .final-content p {
+        max-width: 100%;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .final-button {
+        width: 100%;
+        min-height: 68px;
+        flex-basis: auto;
+        justify-content: center;
+        padding: 12px 15px;
+        border-radius: 17px;
+    }
+
+    /* -------------------------
+       MODAL
+       ------------------------- */
+
+    .education-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+
+        display: none;
+        align-items: center;
+        justify-content: center;
+
+        padding: 12px;
+        overflow-y: auto;
+    }
+
+    .education-modal.active {
+        display: flex;
+    }
+
+    .education-modal-box {
+        width: 100%;
+        max-width: 520px;
+        max-height: 90vh;
+        overflow-y: auto;
+
+        padding: 26px 18px 21px;
+        border-radius: 22px;
+    }
+
+    .education-modal h2 {
+        font-size: 24px;
+        line-height: 1.15;
+        margin-right: 35px;
+    }
+
+    .education-modal .modal-intro,
+    .modal-info-block p,
+    .modal-reflection p {
+        font-size: 13px;
+        line-height: 1.55;
+    }
+}
+
+/* =========================================================
+   MÓVIL PEQUEÑO
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    .navbar-custom {
+        padding-left: 11px;
+        padding-right: 11px;
+    }
+
+    .mobile-menu-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 22px;
+    }
+
+    .hero::after {
+        bottom: -27px;
+        height: 52px;
+    }
+
+    .mission-card {
+        grid-template-columns: 54px minmax(0, 1fr) 38px;
+        column-gap: 8px;
+        padding: 10px 8px;
+    }
+
+    .mission-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 23px;
+    }
+
+    .mission-card h3 {
+        font-size: 14px;
+    }
+
+    .mission-card p {
+        font-size: 11px;
+    }
+
+    .mission-btn {
+        width: 38px;
+        min-width: 38px;
+        height: 38px;
+        min-height: 38px;
+    }
+
+    .final-banner {
+        width: calc(100% - 14px);
+        margin-top: 88px;
+        padding-top: 94px;
+    }
+
+    .final-avatar,
+    .final-avatar img {
+        width: 170px;
+        height: 170px;
+    }
+
+    .why-character {
+        height: 300px;
+    }
+
+    .why-character img {
+        width: 220px;
+        height: 295px;
+    }
+
+    .character-circle {
+        width: 215px;
+        height: 215px;
+    }
+
+    .character-bubble {
+        right: 4px;
+        transform: scale(.9) rotate(3deg);
+    }
+
+    .why-final {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+}
+
+/* =========================================================
+   MÓVIL MUY PEQUEÑO
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+    .mission-card {
+        grid-template-columns: 49px minmax(0, 1fr) 36px;
+        column-gap: 7px;
+        padding: 9px 7px;
+    }
+
+    .mission-icon {
+        width: 46px;
+        height: 46px;
+        font-size: 21px;
+    }
+
+    .mission-card h3 {
+        font-size: 13px;
+    }
+
+    .mission-card p {
+        font-size: 10.5px;
+    }
+
+    .mission-btn {
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
+        min-height: 36px;
+    }
+
+    .final-content h2 {
+        font-size: 18px;
+    }
+}
+
+</style>
 </head>
 
 <body>
@@ -2411,22 +3910,38 @@
         class="hero"
         id="inicio"
     >
+    <picture class="hero-banner-picture">
 
-        <img
-            src="{{ asset('build/img/banner.WebP') }}"
-            alt="Mi Decisión - Aprende, Decide y Avanza"
-            class="banner-img"
-        >
+    <source
+        media="(max-width: 768px)"
+        srcset="{{ asset('build/img/banner-mobile.webp') }}"
+    >
 
-        <!-- Botón independiente -->
-        <a
-            href="#misiones"
-            class="btn-comenzar"
-        >
-            QUIERO CONOCER
-            <i class="fa-solid fa-chevron-right"></i>
-        </a>
+    <img
+        src="{{ asset('build/img/banner.WebP') }}"
+        alt="Mi Decisión"
+        class="banner-img"
+    >
 
+    <a
+    href="#misiones"
+    class="btn-comenzar"
+    aria-label="Quiero conocer los temas"
+>
+    QUIERO CONOCER
+    <i class="fa-solid fa-chevron-right"></i>
+</a>
+
+</picture>
+
+<a
+    href="#misiones"
+    class="btn-comenzar"
+    aria-label="Quiero conocer los temas"
+>
+    QUIERO CONOCER
+    <i class="fa-solid fa-chevron-right"></i>
+</a>
     </section>
 
 
@@ -3950,9 +5465,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </script>
  
+
     <!-- =====================================================
          MODAL EDUCATIVO
     ====================================================== -->
+
+    <div
+        class="education-modal"
+        id="educationModal"
+        aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+    >
+        <div class="education-modal-box">
+
+            <button
+                type="button"
+                class="education-modal-close"
+                id="modalClose"
+                aria-label="Cerrar"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="modal-topic-icon" id="modalIcon">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+
+            <h2 id="modalTitle">Información</h2>
+
+            <p class="modal-intro" id="modalIntro"></p>
+
+            <div class="modal-info-block">
+                <h3 id="modalBlockTitle">Lo importante</h3>
+                <p id="modalBlockText"></p>
+            </div>
+
+            <div class="modal-reflection">
+                <strong>
+                    <i class="fa-solid fa-lightbulb"></i>
+                    Para reflexionar
+                </strong>
+
+                <p id="modalReflection"></p>
+            </div>
+
+        </div>
+    </div>
+
 
    
     <!-- =====================================================
@@ -3966,7 +5527,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
 
         <p>
-            Conoce · Reflexiona · Cuida
+            
         </p>
 
         <p>
@@ -3989,24 +5550,34 @@ document.addEventListener('DOMContentLoaded', function () {
         const mobileMenu =
             document.getElementById('mobileMenu');
 
-        menuMobile.addEventListener('click', function () {
+        if (menuMobile && mobileMenu) {
 
-            mobileMenu.classList.toggle('active');
+            menuMobile.addEventListener('click', function () {
+                mobileMenu.classList.toggle('active');
 
-        });
+                const expanded =
+                    mobileMenu.classList.contains('active');
 
+                menuMobile.setAttribute(
+                    'aria-expanded',
+                    expanded ? 'true' : 'false'
+                );
+            });
 
-        document
-            .querySelectorAll('.mobile-menu a')
-            .forEach(function (link) {
+            document
+                .querySelectorAll('.mobile-menu a')
+                .forEach(function (link) {
 
-                link.addEventListener('click', function () {
-
-                    mobileMenu.classList.remove('active');
+                    link.addEventListener('click', function () {
+                        mobileMenu.classList.remove('active');
+                        menuMobile.setAttribute(
+                            'aria-expanded',
+                            'false'
+                        );
+                    });
 
                 });
-
-            });
+        }
 
 
         /* =========================
@@ -4083,48 +5654,127 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         function openEducationModal(topic) {
+
+            if (!educationModal) return;
+
             const content = educationalContent[topic];
+
             if (!content) return;
 
-            modalTitle.textContent = content.title;
-            modalIntro.textContent = content.intro;
-            modalBlockTitle.textContent = content.blockTitle;
-            modalBlockText.textContent = content.blockText;
-            modalReflection.textContent = content.reflection;
-            modalIcon.innerHTML = '<i class="fa-solid ' + content.icon + '"></i>';
+            if (modalTitle) {
+                modalTitle.textContent = content.title || '';
+            }
+
+            if (modalIntro) {
+                modalIntro.textContent = content.intro || '';
+            }
+
+            if (modalBlockTitle) {
+                modalBlockTitle.textContent =
+                    content.blockTitle || '';
+            }
+
+            if (modalBlockText) {
+                modalBlockText.textContent =
+                    content.blockText || '';
+            }
+
+            if (modalReflection) {
+                modalReflection.textContent =
+                    content.reflection || '';
+            }
+
+            if (modalIcon) {
+                modalIcon.innerHTML =
+                    '<i class="fa-solid ' +
+                    content.icon +
+                    '"></i>';
+            }
 
             educationModal.classList.add('active');
-            educationModal.setAttribute('aria-hidden', 'false');
+            educationModal.setAttribute(
+                'aria-hidden',
+                'false'
+            );
+
             document.body.classList.add('modal-open');
         }
 
+
         function closeEducationModal() {
+
+            if (!educationModal) return;
+
             educationModal.classList.remove('active');
-            educationModal.setAttribute('aria-hidden', 'true');
+
+            educationModal.setAttribute(
+                'aria-hidden',
+                'true'
+            );
+
             document.body.classList.remove('modal-open');
         }
+
 
         document
             .querySelectorAll('.mission-btn[data-topic]')
             .forEach(function (button) {
-                button.addEventListener('click', function () {
-                    openEducationModal(this.dataset.topic);
+
+                button.addEventListener('click', function (event) {
+
+                    event.preventDefault();
+
+                    openEducationModal(
+                        this.dataset.topic
+                    );
+
                 });
+
             });
 
-        modalClose.addEventListener('click', closeEducationModal);
 
-        educationModal.addEventListener('click', function (event) {
-            if (event.target === educationModal) {
-                closeEducationModal();
-            }
-        });
+        if (modalClose) {
 
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && educationModal.classList.contains('active')) {
-                closeEducationModal();
+            modalClose.addEventListener(
+                'click',
+                closeEducationModal
+            );
+
+        }
+
+
+        if (educationModal) {
+
+            educationModal.addEventListener(
+                'click',
+                function (event) {
+
+                    if (
+                        event.target === educationModal
+                    ) {
+                        closeEducationModal();
+                    }
+
+                }
+            );
+
+        }
+
+
+        document.addEventListener(
+            'keydown',
+            function (event) {
+
+                if (
+                    event.key === 'Escape' &&
+                    educationModal &&
+                    educationModal.classList.contains('active')
+                ) {
+                    closeEducationModal();
+                }
+
             }
-        });
+        );
 
     </script>
 
