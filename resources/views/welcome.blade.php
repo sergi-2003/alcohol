@@ -3211,7 +3211,7 @@ iframe {
     }
 
     .mobile-menu {
-        top: 68px;
+        top: 98px;
         left: 0;
         margin-top: 0 !important;
         width: 100%;
@@ -3870,9 +3870,9 @@ iframe {
                 Inicio
             </a>
 
-            <a href="#misiones">
-                Temas
-            </a>
+                     <a href="{{ route('aprende.index') }}"> 
+    Temas 
+</a>
 
             <a href="#como-funciona">
                 ¿Cómo participar?

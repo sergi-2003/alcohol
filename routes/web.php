@@ -187,6 +187,31 @@ Route::get('/media/contenidos/{filename}', function ($filename) {
 
 })->name('media.contenido');
 
+// Recursos de imágenes: AJAX / tiempo real
+Route::post(
+    '/admin/contenidos/{contenido}/recursos',
+    [ContenidoController::class, 'storeRecurso']
+)->middleware('auth')
+  ->name('admin.recursos.store');
+
+Route::patch(
+    '/admin/recursos/{recurso}/posicion',
+    [ContenidoController::class, 'updatePosicionRecurso']
+)->middleware('auth')
+  ->name('admin.recursos.posicion');
+
+Route::post(
+    '/admin/recursos/{recurso}/reemplazar',
+    [ContenidoController::class, 'replaceRecurso']
+)->middleware('auth')
+  ->name('admin.recursos.replace');
+
+Route::delete(
+    '/admin/recursos/{recurso}',
+    [ContenidoController::class, 'destroyRecurso']
+)->middleware('auth')
+  ->name('admin.recursos.destroy');
+
 Route::get('/media/recursos/{filename}', function ($filename) {
 
     $filename = basename($filename);
@@ -201,6 +226,7 @@ Route::get('/media/recursos/{filename}', function ($filename) {
         Storage::disk('public')->path($path)
     );
 
+
 })->name('media.recurso');
 /*
 |--------------------------------------------------------------------------
@@ -208,6 +234,8 @@ Route::get('/media/recursos/{filename}', function ($filename) {
 | TODO LO DE AQUÍ REQUIERE LOGIN
 |--------------------------------------------------------------------------
 */
+
+
 
 Route::prefix('admin')
     ->middleware('auth')
@@ -270,6 +298,8 @@ Route::prefix('admin')
     ])
         ->middleware('permiso:usuarios.editar')
         ->name('admin.usuarios.toggle');
+
+
 
 
     /*
@@ -349,6 +379,24 @@ Route::prefix('admin')
         ->middleware('permiso:contenidos.editar')
         ->name('admin.temas.toggle');
 
+        Route::middleware(['auth', 'permiso:contenidos.editar'])->group(function () {
+
+    Route::post('/admin/contenidos/{contenido}/recursos', [ContenidoController::class, 'storeRecurso'])
+        ->name('admin.recursos.store');
+
+    Route::patch('/admin/recursos/{recurso}/posicion', [ContenidoController::class, 'updatePosicionRecurso'])
+        ->name('admin.recursos.posicion');
+
+    Route::post('/admin/recursos/{recurso}/reemplazar', [ContenidoController::class, 'replaceRecurso'])
+        ->name('admin.recursos.replace');
+
+    Route::delete('/admin/recursos/{recurso}', [ContenidoController::class, 'destroyRecurso'])
+        ->name('admin.recursos.destroy');
+});
+
+
+    
+
 
     /*
     |--------------------------------------------------------------------------
@@ -413,6 +461,9 @@ Route::prefix('admin')
         ContenidoController::class,
         'destroy'
     ])
+
+
+    
         ->middleware('permiso:contenidos.eliminar')
         ->name('admin.contenidos.destroy');
 
