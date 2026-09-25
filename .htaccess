@@ -1,0 +1,20 @@
+<IfModule mod_rewrite.c>
+
+    RewriteEngine On
+
+    # Evitar que las peticiones que ya están dentro de /public
+    # vuelvan a ser procesadas.
+    RewriteRule ^public/ - [L]
+
+    # Página principal
+    RewriteRule ^$ public/index.php [L]
+
+    # Archivos y carpetas que existen dentro de public
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -d
+    RewriteRule ^(.+)$ public/$1 [L]
+
+    # Todas las demás rutas pasan a Laravel
+    RewriteRule ^ public/index.php [L]
+
+</IfModule>

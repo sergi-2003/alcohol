@@ -21,7 +21,20 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+Route::get('/juego-prueba', function () {
+    return view('juegos.prueba');
+})->name('juego.prueba');
 
+// ESCENA 1
+Route::get('/escena', function () {
+    return view('escenas.escena1');
+})->middleware('auth')->name('escena');
+
+// ESCENA 2
+Route::get('/aprende/escena/2', function () {
+    return view('escenas.escena2');
+})->middleware('auth')->name('escenas.escena2');
+    
 /*
 |--------------------------------------------------------------------------
 | CLIENTE / PARTICIPANTE
@@ -395,7 +408,7 @@ Route::prefix('admin')
 });
 
 
-    
+
 
 
     /*
