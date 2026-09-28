@@ -11,19 +11,23 @@ class SesionParticipacion extends Model
     protected $fillable = [
         'participante_id',
         'token',
+        'identificador_anonimo',
         'fecha_inicio',
         'fecha_ultima_actividad',
-        'activa',
+        'fecha_fin',
     ];
 
     protected $casts = [
         'fecha_inicio' => 'datetime',
         'fecha_ultima_actividad' => 'datetime',
-        'activa' => 'boolean',
+        'fecha_fin' => 'datetime',
     ];
 
     public function participante()
     {
-        return $this->belongsTo(Participante::class);
+        return $this->belongsTo(
+            Participantes::class,
+            'participante_id'
+        );
     }
 }

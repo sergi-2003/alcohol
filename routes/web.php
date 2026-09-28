@@ -9,7 +9,7 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\TemaController;
 use App\Http\Controllers\ContenidoController;
 use App\Http\Controllers\AprendeController;
-
+use App\Http\Controllers\ParticipacionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,16 +25,50 @@ Route::get('/juego-prueba', function () {
     return view('juegos.prueba');
 })->name('juego.prueba');
 
-// ESCENA 1
 Route::get('/escena', function () {
     return view('escenas.escena1');
-})->middleware('auth')->name('escena');
+})->name('escena');
 
-// ESCENA 2
+
 Route::get('/aprende/escena/2', function () {
     return view('escenas.escena2');
-})->middleware('auth')->name('escenas.escena2');
-    
+})->name('escenas.escena2');
+
+
+Route::get('/aprende/escena/3', function () {
+    return view('escenas.escena3');
+})->name('escenas.escena3');
+
+
+Route::get('/aprende/escena/4', function () {
+    return view('escenas.escena4');
+})->name('escenas.escena4');
+
+
+Route::get('/participacion', [
+    ParticipacionController::class,
+    'create'
+])->name('participacion.create');
+
+Route::post('/participacion', [
+    ParticipacionController::class,
+    'store'
+])->name('participacion.store');
+
+Route::get('/participacion/avatar', [
+    ParticipacionController::class,
+    'avatar'
+])->name('participacion.avatar');
+
+Route::post('/participacion/avatar', [
+    ParticipacionController::class,
+    'guardarAvatar'
+])->name('participacion.avatar.guardar');
+
+Route::get('/participacion', [
+    ParticipacionController::class,
+    'create'
+])->name('participacion.create');
 /*
 |--------------------------------------------------------------------------
 | CLIENTE / PARTICIPANTE

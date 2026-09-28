@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Aprende | MI DECISIÓN</title>
+    <title>Aprende | Un Sorbito Hoy, Un Problema Mañana</title>
 
 
     {{-- =========================================================
@@ -41,22 +41,22 @@
 
         :root {
 
-            --primary: #1769e0;
-            --primary-dark: #0b3f91;
-            --blue-light: #eaf3ff;
+            --primary: #1A5276;
+            --primary-dark: #154360;
+            --blue-light: #E8F6F3;
 
-            --yellow: #ffc928;
-            --yellow-dark: #e7a900;
+            --yellow: #F1C40F;
+            --yellow-dark: #B9770E;
 
-            --dark: #102a43;
-            --text: #183b56;
+            --dark: #1C2833;
+            --text: #2C3E50;
 
-            --muted: #71859a;
+            --muted: #66788A;
 
-            --background: #f5f8fc;
+            --background: #F4F9F9;
             --card: #ffffff;
 
-            --border: #e4ebf3;
+            --border: #D9EAF5;
 
         }
 
@@ -82,8 +82,8 @@
             background:
                 linear-gradient(
                     180deg,
-                    #f8fbff 0%,
-                    #f2f6fb 100%
+                    #F4F9F9 0%,
+                    #EAF4F1 100%
                 );
 
             color: var(--text);
@@ -843,12 +843,12 @@
             background:
                 linear-gradient(
                     135deg,
-                    #edf5ff,
-                    #f7fbff
+                    #E8F6F3,
+                    #F4F9F9
                 );
 
             border:
-                1px solid #dbe9fa;
+                1px solid #D9EAF5;
 
         }
 
@@ -945,7 +945,7 @@
                 rgba(20,45,75,.13);
 
             border-color:
-                #c8dcf5;
+                #B8D8E8;
 
         }
 
@@ -965,8 +965,8 @@
             background:
                 linear-gradient(
                     135deg,
-                    #edf4ff,
-                    #f8fbff
+                    #E8F6F3,
+                    #F4F9F9
                 );
 
         }
@@ -1140,7 +1140,7 @@
             border-radius: 12px;
 
             background:
-                #edf5ff;
+                #E8F6F3;
 
             color:
                 var(--primary);
@@ -1206,11 +1206,11 @@
                 linear-gradient(
                     135deg,
                     #f4f8ff,
-                    #edf4ff
+                    #E8F6F3
                 );
 
             border:
-                1px solid #e1ebf8;
+                1px solid #D9EAF5;
 
             transition:
                 transform .25s ease,
@@ -1228,8 +1228,8 @@
             background:
                 linear-gradient(
                     135deg,
-                    #edf5ff,
-                    #e6f0ff
+                    #E8F6F3,
+                    #D9EAF5
                 );
 
         }
@@ -1299,7 +1299,7 @@
             display: block;
 
             color:
-                #24415d;
+                #1C2833;
 
             font-size: 11px;
 
@@ -1315,7 +1315,7 @@
             margin-top: 2px;
 
             color:
-                #7890a5;
+                #66788A;
 
             font-size: 10px;
 
@@ -1441,12 +1441,12 @@
             background:
                 linear-gradient(
                     135deg,
-                    #eaf8f3,
-                    #f4fbf8
+                    #E8F6F3,
+                    #F4F9F9
                 );
 
             border:
-                1px solid #d4eee4;
+                1px solid #CDE9DC;
 
             display: flex;
 
@@ -1516,7 +1516,7 @@
                 white;
 
             color:
-                #16805b;
+                #1E8449;
 
             font-size: 22px;
 
@@ -1532,7 +1532,7 @@
                 0 0 3px;
 
             color:
-                #16805b;
+                #1E8449;
 
             font-weight: 850;
 
@@ -1544,7 +1544,7 @@
             margin: 0;
 
             color:
-                #28705b;
+                #276749;
 
             font-size: 13px;
 
@@ -1558,7 +1558,7 @@
             z-index: 2;
 
             color:
-                #28705b;
+                #276749;
 
             font-size: 13px;
 
@@ -1612,10 +1612,10 @@
             justify-content: center;
 
             background:
-                #eef3f8;
+                #E8F6F3;
 
             color:
-                #8a99a8;
+                #718096;
 
             font-size: 34px;
 
@@ -1654,7 +1654,7 @@
                 white;
 
             border-top:
-                1px solid #e4eaf0;
+                1px solid #D9E2E7;
 
             color:
                 var(--muted);
@@ -2054,7 +2054,7 @@
 
                 <img
                     src="{{ asset('build/img/logo.WebP') }}"
-                    alt="MI DECISIÓN"
+                    alt="Un Sorbito Hoy, Un Problema Mañana"
                     class="logo"
                 >
 
@@ -2461,7 +2461,7 @@
                                     class="bi {{ $icono }}"
                                     style="
                                         font-size:4rem;
-                                        color:#1769e0;
+                                        color:#1A5276;
                                     "
                                 ></i>
 
@@ -2481,7 +2481,7 @@
                                     class="bi {{ $icono }}"
                                     style="
                                         font-size:4rem;
-                                        color:#1769e0;
+                                        color:#1A5276;
                                     "
                                 ></i>
 

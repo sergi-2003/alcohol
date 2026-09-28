@@ -2123,11 +2123,11 @@ function hablar() {
 
 
     voz.rate =
-        0.94;
+      0.94;
 
 
     voz.pitch =
-        1.05;
+        1.15;
 
 
     voz.volume =

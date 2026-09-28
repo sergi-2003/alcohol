@@ -1039,7 +1039,7 @@
         speechSynthesis.cancel();
 
         const texto =
-            'Soy el Profesor Alex. ' +
+            '.' +
             efectoSeleccionado.title +
             '. ' +
             efectoSeleccionado.text;
@@ -1083,7 +1083,7 @@
         }
 
         const textoEscena = `
-            Hola. Soy el Profesor Alex.
+           Bueno.
 
             En esta escena vamos a conocer algunos de los
             efectos negativos que puede traer el consumo
