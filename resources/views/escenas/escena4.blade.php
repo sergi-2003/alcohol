@@ -1,6 +1,6 @@
-{{-- Escena educativa: Cómo hablar. El contenido sigue la información entregada por el usuario. --}}
+{{-- Nivel 4: Prevenir y actuar. Conserva la estructura compartida de Aprende. --}}
 @php
-    $escenaActual = isset($escenaActual) ? (int) $escenaActual : 3;
+    $escenaActual = isset($escenaActual) ? (int) $escenaActual : 4;
     $totalEscenas = 4;
     // Posición (0-100) de cada nivel sobre la barra
     $posicion = fn ($n) => (($n - 1) / max($totalEscenas - 1, 1)) * 100;
@@ -111,36 +111,40 @@
         ],
     ];
 
-    // Preguntas del cuestionario ('por' = mensaje específico según la opción elegida)
+    // Preguntas del cuestionario del nivel 4 ('por' = mensaje según la opción elegida)
     $preguntas = [
         [
-            'texto' => 'Tu hija de 16 años llega a las 2am con olor a alcohol. ¿Qué haces primero?',
+            'texto' => 'Tu hijo de 14 años admite haber consumido marihuana 3 veces. ¿Cuál es la ruta correcta?',
             'opciones' => [
-                'Confrontarla inmediatamente y quitarle el celular.',
-                'Verificar que está bien, dejarla dormir y hablar mañana con calma.',
-                'Ignorarlo — casi es adulta.',
-                'Llamar al colegio al día siguiente para reportarlo.',
+                'Internarlo de inmediato en un centro de rehabilitación.',
+                'Hablar con calma, entender el contexto y buscar orientación si se repite.',
+                'Probar la droga tú mismo para entender el efecto.',
+                'Ignorarlo — probar una vez no es el fin del mundo.',
             ],
             'correcta' => 1,
-            'ok'  => 'Hablar al día siguiente en calma es lo que más recomiendan los psicólogos de familia.',
-            'mal' => 'Lo más recomendable es verificar que está bien, dejarla dormir y hablar mañana con calma.',
-            'por' => [],
+            'ok'  => 'Hablar con calma, comprender el contexto y buscar orientación si el consumo se repite permite acompañar sin juzgar.',
+            'mal' => 'La opción adecuada es hablar con calma, entender el contexto y buscar orientación si el consumo se repite.',
+            'por' => [
+                0 => 'No se debe tomar una decisión extrema sin valorar la situación y buscar orientación profesional.',
+                2 => 'Probar la sustancia no es una forma segura de ayudar.',
+                3 => 'Ignorar la situación puede impedir que el joven reciba apoyo oportuno.',
+            ],
         ],
         [
-            'texto' => '¿Cuál frase abre mejor la conversación sobre consumo con tu hijo?',
+            'texto' => 'En Colombia, ¿a qué línea llamar si tu hijo está en una crisis de consumo aguda?',
             'opciones' => [
-                '“¿Estás consumiendo drogas? Necesito que me digas la verdad ya.”',
-                '“Tu primo nunca hizo esto — ¿por qué tú sí?”',
-                '“¿Cómo son las fiestas a las que vas? ¿Qué suele pasar ahí?”',
-                '“Si te vuelvo a encontrar tomando, te quedas sin salidas dos meses.”',
+                'Línea 123 (Policía).',
+                'Línea 106 de Salud Mental — gratuita 24/7.',
+                'Línea 141 del ICBF.',
+                'Esperar a que pase y hablar mañana.',
             ],
-            'correcta' => 2,
-            'ok'  => 'Una pregunta abierta y curiosa invita a conversar sin poner al adolescente a la defensiva.',
-            'mal' => 'La frase que mejor abre la conversación es la que muestra curiosidad: “¿Cómo son las fiestas a las que vas? ¿Qué suele pasar ahí?”.',
+            'correcta' => 1,
+            'ok'  => 'Esa es la respuesta indicada en este material. Si existe peligro inmediato, busca atención urgente por los servicios de emergencia de tu localidad.',
+            'mal' => 'Según el material de este nivel, la opción indicada es la Línea 106 de Salud Mental.',
             'por' => [
-                0 => 'Acusa de entrada y pone al adolescente a la defensiva.',
-                1 => 'Comparar es una de las cosas que no funcionan.',
-                3 => 'El castigo sin comprensión solo enseña a esconderse mejor.',
+                0 => 'Esta opción no corresponde a la respuesta indicada en el material del cuestionario.',
+                2 => 'La Línea 141 está orientada a la protección de niñas, niños y adolescentes.',
+                3 => 'Ante una crisis aguda no se debe esperar sin buscar ayuda.',
             ],
         ],
     ];
@@ -150,9 +154,9 @@
     $hayNivelSiguiente = $escenaActual < $totalEscenas;
     // Rutas de las escenas: la 1 vive en /escena y las demás en /aprende/escena/{n}
     $rutaEscena = fn ($n) => $n <= 1 ? url('/escena') : url('/aprende/escena/' . $n);
-    $urlSiguiente = $urlSiguiente ?? ($hayNivelSiguiente ? $rutaEscena($escenaActual + 1) : url('/aprende'));
+    $urlSiguiente = $urlSiguiente ?? ($hayNivelSiguiente ? $rutaEscena($escenaActual + 1) : (\Illuminate\Support\Facades\Route::has('aprende.graduacion') ? route('aprende.graduacion') : url('/aprende')));
     $posSiguiente = $hayNivelSiguiente ? $posicion($escenaActual + 1) : 100;
-    $nombreMedalla = 'Maestro del diálogo';
+    $nombreMedalla = 'Guardián de la prevención';
     // Copia medalla.webp en public/build/img/ (o pasa $medallaImagen desde el controlador)
     $medallaImagen = $medallaImagen ?? asset('build/img/medalla.webp');
     // Clave para recordar las respuestas de este participante en esta escena
@@ -164,7 +168,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cómo hablar | Aprende</title>
+    <title>Prevenir y actuar | Aprende</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -406,6 +410,36 @@
             .btn{width:100%}
         }
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+        /* ---------- NIVEL 4: PREVENCIÓN Y RECURSOS ---------- */
+        .prevention-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0;padding:0;list-style:none}
+        .prevention-card{padding:16px;min-width:0}
+        .prevention-card .factor-top{margin-bottom:8px}
+        .prevention-card .factor-icon{width:36px;height:36px;border-radius:11px;font-size:19px}
+        .prevention-card h3{font-size:17px;margin-bottom:5px}
+        .prevention-card p{font-size:13px;line-height:1.55}
+        .prevention-card:nth-child(2) .factor-icon{background:var(--blue-soft);color:var(--blue)}
+        .prevention-card:nth-child(3) .factor-icon{background:var(--gold-soft);color:var(--amber)}
+        .prevention-card:nth-child(4) .factor-icon{background:#f0eaff;color:#7352b5}
+        .prevention-card:nth-child(5) .factor-icon{background:var(--green-soft);color:var(--green)}
+        .prevention-card:nth-child(6) .factor-icon{background:#eaf5ff;color:#2e83c9}
+        .resource-intro{margin:18px 0 14px;background:#eafbf3;border-color:var(--green)}
+        .resource-list{display:grid;gap:10px}
+        .resource-card{display:flex;align-items:center;gap:13px;min-width:0;padding:13px 15px;border:1px solid var(--line);border-radius:var(--r);background:#fff;box-shadow:0 4px 16px rgba(60,45,10,.04);color:inherit;text-decoration:none}
+        a.resource-card{transition:transform .15s,border-color .15s}
+        a.resource-card:hover{transform:translateY(-1px);border-color:#b7d0ec}
+        .resource-icon{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:11px;background:var(--blue-soft);color:var(--blue);font-size:18px}
+        .resource-card:nth-child(2) .resource-icon{background:var(--green-soft);color:var(--green)}
+        .resource-card:nth-child(3) .resource-icon{background:var(--gold-soft);color:var(--amber)}
+        .resource-card:nth-child(4) .resource-icon{background:var(--red-soft);color:var(--red)}
+        .resource-card:nth-child(5) .resource-icon{background:#f0eaff;color:#7352b5}
+        .resource-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:2px}
+        .resource-copy strong{font-family:var(--font-title);font-size:16px;color:var(--blue-deep);line-height:1.3}
+        .resource-copy small{font-size:13px;line-height:1.5;color:var(--muted)}
+        .resource-arrow{color:var(--muted);font-size:15px}
+        @media(max-width:760px){.prevention-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.prevention-card{padding:15px}}
+        @media(max-width:520px){.prevention-grid{grid-template-columns:1fr}.resource-card{align-items:flex-start;padding:12px}.resource-copy strong{font-size:14px}.resource-copy small{font-size:12px}}
+
     </style>
 </head>
 <body>
@@ -455,86 +489,100 @@
 <main class="page">
 
     {{-- ============ ENCABEZADO ============ --}}
-    <div class="tag"><i class="bi bi-chat-heart"></i> Nivel 3 · Cómo hablar</div>
-    <h1>La conversación más difícil — y cómo tenerla</h1>
-    <p class="lead">Hay una forma que abre puertas y otra que las cierra para siempre. Aquí aprenderás la diferencia.</p>
+    <div class="tag"><i class="bi bi-shield-fill-check"></i> Nivel 4 · Prevenir y actuar</div>
+    <h1>Prevención real y recursos en Colombia</h1>
+    <p class="lead">Prevenir es más fácil que recuperar. En Colombia puedes buscar orientación y apoyo para acompañar a tu hijo.</p>
 
-    {{-- ============ CLAVES ============ --}}
-    <section aria-labelledby="claves-title">
-        <h2 class="section-title" id="claves-title"><i class="bi bi-key"></i> Cuatro claves para conversar</h2>
-        <p class="section-sub">Téngalas presentes antes de hablar.</p>
+    {{-- ============ ESTRATEGIAS DE PREVENCIÓN ============ --}}
+    <section aria-labelledby="prevencion-title">
+        <h2 class="section-title" id="prevencion-title"><i class="bi bi-shield-check"></i> Acciones que ayudan a prevenir</h2>
+        <p class="section-sub">Pequeñas acciones cotidianas pueden abrir la puerta a conversaciones importantes.</p>
 
-        <ul class="factors">
-            @foreach($factores as [$icono, $titulo, $texto, $dato])
-                <li class="factor">
-                    <div class="factor-top">
-                        <span class="factor-icon"><i class="bi {{ $icono }}"></i></span>
-                        @if($dato)
-                            <span class="factor-data">{{ $dato }}</span>
-                        @endif
-                    </div>
-                    <h3>{{ $titulo }}</h3>
-                    <p>{{ $texto }}</p>
-                </li>
-            @endforeach
+        <ul class="prevention-grid">
+            <li class="factor prevention-card">
+                <div class="factor-top"><span class="factor-icon"><i class="bi bi-heart-fill"></i></span></div>
+                <h3>El vínculo primero</h3>
+                <p>Fortalece una relación de confianza para que tu hijo pueda hablar contigo y pedir ayuda sin miedo a ser juzgado.</p>
+            </li>
+            <li class="factor prevention-card">
+                <div class="factor-top"><span class="factor-icon"><i class="bi bi-bullseye"></i></span></div>
+                <h3>Dales propósito</h3>
+                <p>Apoya sus intereses, metas y actividades saludables para que tenga alternativas positivas para ocupar su tiempo.</p>
+            </li>
+            <li class="factor prevention-card">
+                <div class="factor-top"><span class="factor-icon"><i class="bi bi-hand-thumbs-down-fill"></i></span></div>
+                <h3>Entrena el “no”</h3>
+                <p>Practiquen cómo rechazar una invitación a consumir y cómo salir de una situación incómoda con seguridad.</p>
+            </li>
+            <li class="factor prevention-card">
+                <div class="factor-top"><span class="factor-icon"><i class="bi bi-people-fill"></i></span></div>
+                <h3>Conoce su círculo</h3>
+                <p>Interésate por sus amistades y actividades con curiosidad y respeto, sin convertir la conversación en un interrogatorio.</p>
+            </li>
+            <li class="factor prevention-card">
+                <div class="factor-top"><span class="factor-icon"><i class="bi bi-journals"></i></span></div>
+                <h3>Información real</h3>
+                <p>Responde sus preguntas con información clara y confiable, evitando exageraciones, amenazas o mensajes que generen vergüenza.</p>
+            </li>
+            <li class="factor prevention-card">
+                <div class="factor-top"><span class="factor-icon"><i class="bi bi-shield-check"></i></span></div>
+                <h3>Revisa tu ejemplo</h3>
+                <p>Reflexiona sobre los mensajes que transmites con tus propias decisiones y demuestra que pedir ayuda es válido.</p>
+            </li>
         </ul>
-
-        <aside class="note danger">
-            <i class="bi bi-slash-circle-fill"></i>
-            <div>
-                <h3>Lo que NO funciona</h3>
-                <p>Gritar, comparar (“tu hermano nunca hizo esto”), dramatizar, ignorar o castigar sin hablar. El castigo sin comprensión solo enseña a esconderse mejor.</p>
-            </div>
-        </aside>
     </section>
 
-    {{-- ============ GUION CON AVATAR (AUDIO) ============ --}}
-    <section aria-labelledby="guion-title">
-        <h2 class="section-title" id="guion-title"><i class="bi bi-mic"></i> Guion para la conversación difícil</h2>
-        <p class="section-sub">Adapte este modelo a su estilo. Escuche a {{ $avatarNombre }} decirlo en voz alta.</p>
+    {{-- ============ RECURSOS DE APOYO ============ --}}
+    <section aria-labelledby="recursos-title">
+        <h2 class="section-title" id="recursos-title"><i class="bi bi-telephone-forward"></i> Rutas de ayuda en Colombia</h2>
+        <p class="section-sub">Si te preocupa el consumo, no tienes que resolverlo sin acompañamiento. Consulta la disponibilidad local de cada servicio.</p>
 
-        <div class="speaker" id="speaker">
-            <div class="speaker-side">
-                <div class="speaker-img">
-                    <img id="spkAvatarImg" src="{{ $avatarRuta }}" alt="{{ $avatarNombre }} hablando">
-                </div>
-                <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-                <div class="speaker-name" id="spkAvatarName">{{ $avatarNombre }}<small id="spkAvatarSubtitle">Tu compañero te lo cuenta</small></div>
+        <aside class="note resource-intro">
+            <i class="bi bi-telephone-fill"></i>
+            <div>
+                <h3>Buscar ayuda también es prevenir</h3>
+                <p>La orientación profesional puede ayudar a comprender la situación y decidir los siguientes pasos con tu familia.</p>
             </div>
+        </aside>
 
-            <div class="speaker-main">
-                <div class="steps" id="spkSteps" role="group" aria-label="Pasos del guion">
-                    @foreach($guion as $i => $g)
-                        <button type="button" class="step-chip {{ $i === 0 ? 'active' : '' }}" data-i="{{ $i }}" aria-pressed="{{ $i === 0 ? 'true' : 'false' }}">{{ $g['corto'] }}</button>
-                    @endforeach
-                </div>
-
-                <div class="bubble" aria-live="polite">
-                    <small id="spkLabel">{{ $guion[0]['etapa'] }}</small>
-                    <p id="spkText">{{ $guion[0]['texto'] }}</p>
-                </div>
-
-                <div class="controls">
-                    <button type="button" class="btn btn-primary" id="btnEscuchar">
-                        <i class="bi bi-volume-up-fill"></i> <span>Escuchar este paso</span>
-                    </button>
-                    <button type="button" class="btn" id="btnTodo"><i class="bi bi-play-circle"></i> Escuchar todo</button>
-                    <button type="button" class="btn btn-icon" id="btnPrev" aria-label="Paso anterior" disabled><i class="bi bi-chevron-left"></i></button>
-                    <button type="button" class="btn btn-icon" id="btnNext" aria-label="Paso siguiente"><i class="bi bi-chevron-right"></i></button>
-                    <button type="button" class="btn" id="btnVel" aria-pressed="false"><i class="bi bi-speedometer2"></i> <span>Velocidad normal</span></button>
-                </div>
-
-                <p class="spk-note" id="spkNote">Pulse «Escuchar este paso» cuando quiera oír cada intervención. Al terminar la apertura aparecerá el joven; su audio no comenzará hasta que usted lo reproduzca.</p>
-
-                <details class="transcript" id="spkTranscript">
-                    <summary>Leer el guion completo</summary>
-                    <ol>
-                        @foreach($guion as $g)
-                            <li><strong>{{ $g['etapa'] }}</strong><p>{{ $g['texto'] }}</p></li>
-                        @endforeach
-                    </ol>
-                </details>
-            </div>
+        <div class="resource-list">
+            <a class="resource-card" href="tel:106">
+                <span class="resource-icon"><i class="bi bi-heart-pulse-fill"></i></span>
+                <span class="resource-copy">
+                    <strong>Línea 106 — Salud Mental</strong>
+                    <small>Orientación en salud mental. Confirma el horario y la disponibilidad en tu municipio.</small>
+                </span>
+                <i class="bi bi-arrow-up-right resource-arrow"></i>
+            </a>
+            <a class="resource-card" href="tel:141">
+                <span class="resource-icon"><i class="bi bi-telephone-fill"></i></span>
+                <span class="resource-copy">
+                    <strong>Línea 141 — ICBF</strong>
+                    <small>Orientación y protección para niñas, niños y adolescentes.</small>
+                </span>
+                <i class="bi bi-arrow-up-right resource-arrow"></i>
+            </a>
+            <article class="resource-card">
+                <span class="resource-icon"><i class="bi bi-hospital-fill"></i></span>
+                <span class="resource-copy">
+                    <strong>CAMAD y servicios locales de atención</strong>
+                    <small>Consulta con la Secretaría de Salud o la red de salud municipal para identificar los servicios disponibles.</small>
+                </span>
+            </article>
+            <article class="resource-card">
+                <span class="resource-icon"><i class="bi bi-house-heart-fill"></i></span>
+                <span class="resource-copy">
+                    <strong>Psicólogo del colegio</strong>
+                    <small>Puede orientar a la familia y ayudar a coordinar el apoyo desde el entorno educativo.</small>
+                </span>
+            </article>
+            <article class="resource-card">
+                <span class="resource-icon"><i class="bi bi-people-fill"></i></span>
+                <span class="resource-copy">
+                    <strong>Programas de prevención territoriales</strong>
+                    <small>Pregunta en tu municipio por programas de prevención y acompañamiento familiar.</small>
+                </span>
+            </article>
         </div>
     </section>
 
@@ -543,7 +591,7 @@
         <div class="quiz-head">
             <div>
                 <div class="tag"><i class="bi bi-controller"></i> Actividad interactiva</div>
-                <h2 class="section-title" id="quiz-title" style="margin-top:12px">Quiz del nivel 3</h2>
+                <h2 class="section-title" id="quiz-title" style="margin-top:12px">Quiz del nivel 4</h2>
                 <p class="section-sub" style="margin:0">Elija con calma: cada pregunta se responde una sola vez. Solo los aciertos suman XP; si acierta todas, gana un bono.</p>
             </div>
             <div class="rewards">
@@ -564,7 +612,7 @@
                 </div>
                 <h3>{{ $avatarNombre }}</h3>
                 <small>Tu compañero · Nivel {{ $escenaActual }}</small>
-                <p>Piense con calma y elija la opción que ayude a conversar y buscar apoyo.</p>
+                <p>Piensa con calma y elige la opción que ayude a prevenir y buscar apoyo.</p>
 
                 <div class="quiz-meter">
                     <div><span>Respondidas</span><strong><span id="quizAnswered">0</span> de {{ count($preguntas) }}</strong></div>
@@ -609,7 +657,7 @@
     <div class="actions">
         <a class="btn" href="{{ $urlAnterior }}"><i class="bi bi-arrow-left"></i> Anterior</a>
         <button class="btn btn-primary" id="btnCompletar" type="button" onclick="completarEscena()">
-            {{ $hayNivelSiguiente ? 'Continuar al Nivel ' . ($escenaActual + 1) : 'Finalizar recorrido' }} <i class="bi bi-arrow-right"></i>
+            {{ $hayNivelSiguiente ? 'Continuar al Nivel ' . ($escenaActual + 1) : (\Illuminate\Support\Facades\Route::has('aprende.graduacion') ? 'Ir a la graduación' : 'Finalizar recorrido') }} <i class="bi bi-arrow-right"></i>
         </button>
         <p class="hint" id="quizHint" role="alert" hidden>Responda las dos preguntas para continuar al siguiente nivel.</p>
     </div>
@@ -632,7 +680,7 @@
         </div>
         <div class="modal-actions">
             <button type="button" class="btn btn-primary" id="modalNext">
-                {{ $hayNivelSiguiente ? 'Continuar al Nivel ' . ($escenaActual + 1) : 'Finalizar recorrido' }} <i class="bi bi-arrow-right"></i>
+                {{ $hayNivelSiguiente ? 'Continuar al Nivel ' . ($escenaActual + 1) : (\Illuminate\Support\Facades\Route::has('aprende.graduacion') ? 'Ir a la graduación' : 'Finalizar recorrido') }} <i class="bi bi-arrow-right"></i>
             </button>
             <button type="button" class="btn" id="modalClose">Revisar mis respuestas</button>
         </div>
@@ -911,207 +959,6 @@
         actualizar();
     })();
 </script>
-<script>
-    /* Avatar que habla: usa grabaciones (mp3) si existen; si no, la voz del dispositivo */
-    (() => {
-        const PASOS = @json($guion);
 
-        const box = document.getElementById('speaker');
-        const chips = Array.from(document.querySelectorAll('#spkSteps .step-chip'));
-        const etiqueta = document.getElementById('spkLabel');
-        const texto = document.getElementById('spkText');
-        const btnEscuchar = document.getElementById('btnEscuchar');
-        const btnTodo = document.getElementById('btnTodo');
-        const btnPrev = document.getElementById('btnPrev');
-        const btnNext = document.getElementById('btnNext');
-        const btnVel = document.getElementById('btnVel');
-        const nota = document.getElementById('spkNote');
-        const guionCompleto = document.getElementById('spkTranscript');
-        const avatarImg = document.getElementById('spkAvatarImg');
-        const avatarNombreEl = document.getElementById('spkAvatarName');
-        const avatarSubtituloEl = document.getElementById('spkAvatarSubtitle');
-        const AVATAR_GUIA = @json($avatarRuta);
-        const AVATAR_GUIA_NOMBRE = @json($avatarNombre);
-        const AVATAR_RESPUESTA = @json($avatarRespuesta);
-        const AVATAR_RESPUESTA_ALTERNATIVA = @json($avatarRespuestaAlternativa);
-
-        const sintesis = ('speechSynthesis' in window) ? window.speechSynthesis : null;
-        const audioEl = new Audio();
-        const hayAudio = PASOS.some(p => p.audio);
-        const todoConAudio = PASOS.every(p => p.audio);
-
-        let actual = 0;
-        let hablando = false;
-        let secuencia = false;
-        let lento = false;
-        let token = 0;
-        let voz = null;
-
-        if (!sintesis && !hayAudio) {
-            [btnEscuchar, btnTodo, btnVel].forEach(b => { b.disabled = true; });
-            nota.textContent = 'Su navegador no permite reproducir audio. Lea el guion completo aquí abajo.';
-            guionCompleto.open = true;
-        } else if (todoConAudio) {
-            nota.hidden = true;
-        }
-
-        function elegirVoz() {
-            if (!sintesis) return;
-            const voces = sintesis.getVoices();
-            const preferidas = ['es-CO', 'es-419', 'es-MX', 'es-US', 'es-AR', 'es-ES'];
-            voz = null;
-            for (const l of preferidas) {
-                voz = voces.find(v => v.lang.replace('_', '-') === l);
-                if (voz) break;
-            }
-            if (!voz) voz = voces.find(v => v.lang.toLowerCase().startsWith('es')) || null;
-        }
-        elegirVoz();
-        if (sintesis) sintesis.addEventListener('voiceschanged', elegirVoz);
-
-        function mostrar(i) {
-            actual = i;
-            etiqueta.textContent = PASOS[i].etapa;
-            texto.textContent = PASOS[i].texto;
-
-            // Solo cambia el personaje de la conversación; el avatar elegido del usuario
-            // sigue intacto en la barra de progreso y en el cuestionario.
-            const respondeElJoven = PASOS[i].personaje === 'joven';
-            // Si la imagen no está en la carpeta esperada, prueba la ruta alternativa.
-            // Evita reemplazar silenciosamente al joven por el avatar seleccionado.
-            avatarImg.onerror = function () {
-                if (respondeElJoven && !this.dataset.proboRutaAlternativa) {
-                    this.dataset.proboRutaAlternativa = '1';
-                    this.src = AVATAR_RESPUESTA_ALTERNATIVA;
-                    return;
-                }
-                this.onerror = null;
-                if (respondeElJoven) {
-                    this.alt = 'No se encontró avatar-nivel3.webp. Verifique la carpeta public/build/img/avatars/';
-                } else {
-                    this.src = AVATAR_GUIA;
-                }
-            };
-            if (respondeElJoven) {
-                delete avatarImg.dataset.proboRutaAlternativa;
-                avatarImg.src = AVATAR_RESPUESTA;
-            } else {
-                avatarImg.onerror = function () {
-                    this.onerror = null;
-                    this.src = @json(asset('build/img/avatars/cuerpo.webp'));
-                };
-                avatarImg.src = AVATAR_GUIA;
-            }
-            avatarImg.alt = respondeElJoven
-                ? 'Joven que responde con sinceridad'
-                : AVATAR_GUIA_NOMBRE + ' hablando';
-            avatarNombreEl.childNodes[0].textContent = respondeElJoven ? 'Joven' : AVATAR_GUIA_NOMBRE;
-            avatarSubtituloEl.textContent = respondeElJoven
-                ? 'Responde con sinceridad'
-                : 'Tu compañero te lo cuenta';
-
-            chips.forEach((c, k) => {
-                c.classList.toggle('active', k === i);
-                c.setAttribute('aria-pressed', k === i ? 'true' : 'false');
-            });
-            btnPrev.disabled = i === 0;
-            btnNext.disabled = i === PASOS.length - 1;
-        }
-
-        function pintarBoton() {
-            btnEscuchar.querySelector('span').textContent = hablando ? 'Detener' : 'Escuchar este paso';
-            btnEscuchar.querySelector('i').className = hablando ? 'bi bi-stop-fill' : 'bi bi-volume-up-fill';
-        }
-
-        function detener() {
-            token++;
-            secuencia = false;
-            hablando = false;
-            box.classList.remove('speaking');
-            if (sintesis) sintesis.cancel();
-            audioEl.pause();
-            pintarBoton();
-        }
-
-        function hablar(i) {
-            const mio = ++token;
-            if (sintesis) sintesis.cancel();
-            audioEl.pause();
-
-            mostrar(i);
-            hablando = true;
-            box.classList.add('speaking');
-            pintarBoton();
-
-            const fin = () => {
-                if (mio !== token) return;
-                hablando = false;
-                box.classList.remove('speaking');
-                pintarBoton();
-                if (secuencia && i < PASOS.length - 1) {
-                    setTimeout(() => { if (mio === token && secuencia) hablar(i + 1); }, 600);
-                } else {
-                    secuencia = false;
-                    // En reproducción individual, al terminar la apertura aparece el joven.
-                    // El segundo audio queda esperando a que el usuario pulse "Escuchar este paso".
-                    if (i === 0 && PASOS[i + 1] && PASOS[i + 1].personaje === 'joven') {
-                        mostrar(i + 1);
-                    }
-                }
-            };
-
-            const paso = PASOS[i];
-
-            if (paso.audio) {
-                audioEl.src = paso.audio;
-                audioEl.playbackRate = lento ? 0.85 : 1;
-                audioEl.onended = fin;
-                audioEl.onerror = fin;
-                audioEl.play().catch(fin);
-            } else if (sintesis) {
-                const u = new SpeechSynthesisUtterance(paso.voz || paso.texto);
-                u.lang = voz ? voz.lang : 'es-CO';
-                if (voz) u.voice = voz;
-                u.rate = lento ? 0.8 : 1;
-                u.onend = fin;
-                u.onerror = fin;
-                // Pequeña pausa: algunos navegadores ignoran speak() justo después de cancel()
-                setTimeout(() => { if (mio === token) sintesis.speak(u); }, 80);
-            } else {
-                fin();
-            }
-        }
-
-        btnEscuchar.addEventListener('click', () => {
-            if (hablando) { detener(); return; }
-            secuencia = false;
-            hablar(actual);
-        });
-
-        btnTodo.addEventListener('click', () => {
-            detener();
-            secuencia = true;
-            hablar(0);
-        });
-
-        btnPrev.addEventListener('click', () => { detener(); mostrar(Math.max(actual - 1, 0)); });
-        btnNext.addEventListener('click', () => { detener(); mostrar(Math.min(actual + 1, PASOS.length - 1)); });
-
-        chips.forEach((c) => c.addEventListener('click', () => {
-            detener();
-            mostrar(Number(c.dataset.i));
-        }));
-
-        btnVel.addEventListener('click', () => {
-            lento = !lento;
-            btnVel.setAttribute('aria-pressed', lento ? 'true' : 'false');
-            btnVel.querySelector('span').textContent = lento ? 'Velocidad lenta' : 'Velocidad normal';
-        });
-
-        // Que el audio no siga sonando al salir o cambiar de pestaña
-        window.addEventListener('pagehide', detener);
-        document.addEventListener('visibilitychange', () => { if (document.hidden) detener(); });
-    })();
-</script>
 </body>
 </html>

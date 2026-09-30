@@ -415,6 +415,58 @@ body.modal-open{overflow:hidden}
   color:#fff;
   transform:translateY(-1px);
 }
+.controles-guia-audio{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  gap:10px !important;
+  width:100% !important;
+  margin-top:14px !important;
+}
+.controles-guia-audio .btn-guia-audio,
+.controles-guia-audio .btn-guia-detener{
+  display:inline-flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  position:relative !important;
+  width:auto !important;
+  min-height:40px;
+  margin:0 !important;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:10px 16px;
+  border-radius:999px;
+  font:700 15px var(--sans);
+  cursor:pointer;
+  box-sizing:border-box;
+}
+.controles-guia-audio .btn-guia-audio{
+  border:2px solid var(--teal);
+  background:#fff;
+  color:var(--teal);
+}
+.controles-guia-audio .btn-guia-detener{
+  border:2px solid #C94B42;
+  background:#fff;
+  color:#B63B33;
+}
+.controles-guia-audio .btn-guia-detener:hover,
+.controles-guia-audio .btn-guia-detener.activo{
+  background:#C94B42;
+  color:#fff;
+}
+@media (max-width:600px){
+  .controles-guia-audio{
+    align-items:flex-start !important;
+  }
+  .controles-guia-audio .btn-guia-audio,
+  .controles-guia-audio .btn-guia-detener{
+    width:auto !important;
+    max-width:100%;
+  }
+}
+
 .btn-guia-audio.hablando{
   background:var(--teal);
   color:#fff;
@@ -458,7 +510,7 @@ body.modal-open{overflow:hidden}
     <source media="(max-width: 768px)" srcset="{{ asset('build/img/banner-mobile.webp') }}">
     <img src="{{ asset('build/img/banner.WebP') }}" alt="Mi Decisión">
   </picture>
-  <a href="#misiones" class="btn-hero" aria-label="Quiero conocer los temas">QUIERO CONOCER <i class="fa-solid fa-chevron-right"></i></a>
+  <a href="{{ route('participacion.create') }}" class="btn-hero" aria-label="Quiero conocer los temas">QUIERO CONOCER <i class="fa-solid fa-chevron-right"></i></a>
 </section>
 
 <section class="seccion pasos" id="como-funciona">
@@ -473,20 +525,24 @@ body.modal-open{overflow:hidden}
           Aquí encontrarás información y herramientas para fortalecer
           la prevención desde el hogar.
         </p>
-        <button type="button" id="btnHablarGuia" class="btn-guia-audio" aria-label="Escuchar a la guía">
-          <i class="fa-solid fa-volume-high"></i>
-          <span>Escuchar a la guía</span>
-        </button>
+        <div class="controles-guia-audio">
+          <button type="button" id="btnHablarGuia" class="btn-guia-audio" aria-label="Escuchar a la guía">
+            <i class="fa-solid fa-volume-high"></i>
+            <span>Escuchar a la guía</span>
+          </button>
+          <button type="button" id="btnDetenerGuia" class="btn-guia-detener"
+                  aria-label="Detener el audio de la guía">
+            <i class="fa-solid fa-stop"></i>
+            <span>Detener audio</span>
+          </button>
+        </div>
         <audio id="audioGuia" preload="auto">
             <source src="{{ asset('build/audio/guia_bienvenida.mp3') }}" type="audio/mpeg">
             Su navegador no admite la reproducción de audio.
         </audio>
 
 
-        <audio id="audioGuia" preload="auto">
-          <source src="{{ asset('build/audio/guia_bienvenida.mp3') }}" type="audio/mpeg">
-          Su navegador no admite la reproducción de audio.
-        </audio>
+        
       </div>
     </div>
     <div>
@@ -506,7 +562,7 @@ body.modal-open{overflow:hidden}
     </div>
   </div>
 </section>
-
+<!--
 <section class="seccion temas" id="misiones">
   <div class="wrap">
     <h2>Conozca y reflexione</h2>
@@ -519,7 +575,7 @@ body.modal-open{overflow:hidden}
       </article>
       <article class="tema">
         <div class="tema-ico"><i class="fa-solid fa-brain"></i></div>
-        <div><h3>Alcohol y emociones</h3><p>Cómo las emociones influyen en las decisiones y qué alternativas saludables existen para afrontarlas.</p></div>
+        <div><h3>Prevenir es manejar nuestras emociones</h3><p>Cómo las emociones influyen en las decisiones y qué alternativas saludables existen para afrontarlas.</p></div>
         <button type="button" data-topic="Alcohol y emociones">Reflexionar</button>
       </article>
       <article class="tema">
@@ -539,7 +595,7 @@ body.modal-open{overflow:hidden}
       </article>
     </div>
   </div>
-</section>
+</section>-->
 
 <section class="linea" aria-label="Línea de apoyo">
   <div class="wrap">
@@ -552,6 +608,7 @@ body.modal-open{overflow:hidden}
   </div>
 </section>
 
+<!--
 <section class="seccion" id="por-que-alcohol">
   <div class="wrap">
     <div class="porque-cab">
@@ -570,7 +627,7 @@ body.modal-open{overflow:hidden}
     </div>
    
   </div>
-</section>
+</section>-->
 
 <div class="modal" id="educationModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-caja">
@@ -719,6 +776,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.clas
 
 const audioGuia = document.getElementById('audioGuia');
 const btnHablarGuia = document.getElementById('btnHablarGuia');
+const btnDetenerGuia = document.getElementById('btnDetenerGuia');
+let guiaDetenidaManualmente = false;
 
 const audiosGuia = [
     "{{ asset('build/audio/guia_bienvenida.mp3') }}",
@@ -733,6 +792,11 @@ function actualizarBotonAudio(hablando) {
 
     const icono = btnHablarGuia.querySelector('i');
     const texto = btnHablarGuia.querySelector('span');
+
+    if (btnDetenerGuia) {
+        btnDetenerGuia.setAttribute('aria-disabled', hablando ? 'false' : 'true');
+        btnDetenerGuia.classList.toggle('activo', hablando);
+    }
 
     if (hablando) {
         if (icono) icono.className = 'fa-solid fa-volume-high';
@@ -782,6 +846,12 @@ if (audioGuia) {
 
         actualizarBotonAudio(false);
 
+        if (guiaDetenidaManualmente) {
+            guiaDetenidaManualmente = false;
+            audioActual = 0;
+            return;
+        }
+
         audioActual++;
 
         if (audioActual < audiosGuia.length) {
@@ -810,12 +880,27 @@ if (audioGuia) {
     });
 }
 
+/* Botón para detener toda la secuencia */
+if (btnDetenerGuia) {
+    btnDetenerGuia.addEventListener('click', function () {
+        if (!audioGuia) return;
+
+        guiaDetenidaManualmente = true;
+        audioGuia.pause();
+        audioGuia.currentTime = 0;
+        audioActual = 0;
+        actualizarBotonAudio(false);
+    });
+}
+
 /* Botón para repetir desde el primer audio */
 if (btnHablarGuia) {
 
     btnHablarGuia.addEventListener('click', function () {
 
         if (!audioGuia) return;
+
+        guiaDetenidaManualmente = false;
 
         if (!audioGuia.paused) {
 
@@ -843,7 +928,9 @@ window.addEventListener('load', function () {
     autoplayIntentado = true;
 
     setTimeout(function () {
-        reproducirGuia(0);
+        if (!guiaDetenidaManualmente) {
+            reproducirGuia(0);
+        }
     }, 300);
 
 });

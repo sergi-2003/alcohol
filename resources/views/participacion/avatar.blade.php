@@ -2,341 +2,171 @@
 <html lang="es">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <meta name="csrf-token"
-          content="{{ csrf_token() }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Elige tu avatar | Ponte Pilas</title>
 
-    <link rel="icon"
-          href="{{ asset('build/img/logo.webp') }}">
+    <link rel="icon" href="{{ asset('build/img/logo.webp') }}">
 
-    {{-- Bootstrap Icons --}}
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-
         /* =========================================================
-           RESET
+           RESET + VARIABLES
         ========================================================= */
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-
-        /* =========================================================
-           VARIABLES
-        ========================================================= */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-
             --azul: #1657a3;
             --azul-oscuro: #0c376f;
             --azul-profundo: #082d5c;
-
-            --azul-claro: #eaf4ff;
-            --azul-suave: #f4f8fd;
+            --azul-claro: #e8f2ff;
 
             --dorado: #f0bd45;
-            --dorado-claro: #fff5d9;
+            --dorado-oscuro: #8a6210;
+            --dorado-claro: #fff1cc;
 
             --verde: #23a879;
 
-            --texto: #203247;
-            --texto-suave: #708196;
+            --crema: #fffaf0;
+            --crema-2: #fff4de;
 
+            --texto: #2a3648;
+            --texto-suave: #66768a;
             --blanco: #ffffff;
+            --borde: #eadfca;
 
-            --borde: #dfe8f2;
-
-            --sombra:
-                0 20px 60px rgba(20, 62, 105, .13);
+            --radio: 22px;
+            --sombra-suave: 0 8px 22px rgba(90, 60, 10, .08);
+            --sombra-media: 0 18px 40px rgba(40, 60, 100, .14);
         }
 
-
-        /* =========================================================
-           BODY
-        ========================================================= */
+        html { scroll-behavior: smooth; }
 
         body {
-
             min-height: 100vh;
-
-            font-family:
-                Inter,
-                system-ui,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                sans-serif;
-
+            font-family: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
             color: var(--texto);
-
+            line-height: 1.5;
             background:
-                linear-gradient(
-                    rgba(237, 245, 253, .83),
-                    rgba(248, 251, 255, .93)
-                ),
-                url("{{ asset('build/img/fondo.webp') }}")
-                center / cover fixed no-repeat;
-
+                linear-gradient(rgba(255, 248, 232, .90), rgba(255, 252, 245, .95)),
+                url("{{ asset('build/img/fondo.webp') }}") center / cover fixed no-repeat;
+            background-color: var(--crema);
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-
-        /* =========================================================
-           DECORACIÓN
-        ========================================================= */
-
+        /* Manchas decorativas suaves */
+        body::before, body::after {
+            content: "";
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
         body::before {
-
-            content: "";
-
-            position: fixed;
-
-            width: 360px;
-            height: 360px;
-
-            border-radius: 50%;
-
-            background:
-                rgba(240, 189, 69, .12);
-
-            top: -150px;
-            right: -100px;
-
-            pointer-events: none;
+            width: 420px; height: 420px;
+            top: -170px; right: -120px;
+            background: radial-gradient(circle, rgba(240, 189, 69, .28), transparent 70%);
         }
-
-
         body::after {
-
-            content: "";
-
-            position: fixed;
-
-            width: 280px;
-            height: 280px;
-
-            border-radius: 50%;
-
-            background:
-                rgba(22, 87, 163, .08);
-
-            bottom: -130px;
-            left: -100px;
-
-            pointer-events: none;
+            width: 380px; height: 380px;
+            bottom: -160px; left: -120px;
+            background: radial-gradient(circle, rgba(22, 87, 163, .14), transparent 70%);
         }
 
+        img { max-width: 100%; display: block; }
+
+        :focus-visible {
+            outline: 3px solid var(--dorado);
+            outline-offset: 3px;
+        }
 
         /* =========================================================
-           PAGE
+           LAYOUT
         ========================================================= */
-
         .page {
-
             position: relative;
             z-index: 1;
-
             min-height: 100vh;
-
-            padding:
-                28px
-                20px
-                55px;
-
             display: flex;
-
             justify-content: center;
-
-            align-items: flex-start;
+            padding: 20px 20px 48px;
         }
 
-
-        .container {
-
-            width: 100%;
-
-            max-width: 1180px;
-        }
-
+        .container { width: 100%; max-width: 1140px; }
 
         /* =========================================================
            HEADER
         ========================================================= */
-
-        .header {
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            gap: 20px;
-
-            margin-bottom: 22px;
-
-            padding: 13px 18px;
-
-            background:
-                rgba(255,255,255,.93);
-
-            border:
-                1px solid rgba(255,255,255,.85);
-
-            border-radius: 18px;
-
-            box-shadow:
-                0 12px 35px rgba(20,62,105,.10);
-
-            backdrop-filter:
-                blur(12px);
-        }
-
-
-        .brand {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 11px;
-        }
-
-
-        .brand-logo {
-
-            width: 45px;
-            height: 45px;
-
-            object-fit: contain;
-
-            border-radius: 12px;
-        }
-
-
-        .brand h1 {
-
-            font-size: 18px;
-
-            line-height: 1;
-
-            font-weight: 850;
-
-            color: var(--azul-oscuro);
-
-            margin-bottom: 4px;
-        }
-
-
-        .brand p {
-
-            font-size: 11px;
-
-            color: var(--texto-suave);
-        }
-
-
-        .step {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 8px;
-
-            padding: 9px 14px;
-
-            border-radius: 50px;
-
-            background:
-                var(--azul-claro);
-
-            color:
-                var(--azul);
-
-            font-size: 12px;
-
-            font-weight: 800;
-
-            white-space: nowrap;
-        }
-
-
-        .step i {
-
-            font-size: 15px;
-        }
-
-
-
-        /* =========================================================
-           HEADER + NAV DINÁMICO
-        ========================================================= */
-
         .header {
             position: sticky;
-            top: 14px;
+            top: 12px;
             z-index: 100;
-            min-height: 66px;
-            margin-bottom: 12px;
-            padding: 9px 12px 9px 15px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+            padding: 10px 14px;
             border-radius: 20px;
-            gap: 12px;
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid rgba(255, 255, 255, .95);
+            box-shadow: 0 10px 30px rgba(90, 60, 10, .10);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
         }
 
         .brand {
-            min-width: 190px;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             color: inherit;
             text-decoration: none;
+            min-width: 0;
         }
 
         .brand-logo-wrap {
-            width: 156px;
-            height: 62px;
+            flex: 0 0 auto;
             display: grid;
             place-items: center;
-            flex: 0 0 42px;
-            border-radius: 13px;
-            background: #f1f7ff;
-            box-shadow: inset 0 0 0 1px #e3edf8;
+            padding: 4px 10px;
+            height: 52px;
+            border-radius: 14px;
+            background: var(--azul-claro);
         }
 
         .brand-logo {
-            width: 156px;
-            height: 63px;
+            height: 42px;
+            width: auto;
+            max-width: 130px;
             object-fit: contain;
         }
 
         .brand-copy h1 {
-            margin: 0 0 3px;
+            font-size: 18px;
+            line-height: 1.1;
+            font-weight: 900;
+            color: var(--azul-oscuro);
         }
 
         .brand-copy p {
-            margin: 0;
+            margin-top: 2px;
+            font-size: 12px;
+            color: var(--texto-suave);
+            font-weight: 600;
         }
 
         .main-nav {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 4px;
-            flex: 1;
         }
 
         .nav-link {
@@ -344,1132 +174,588 @@
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            padding: 9px 11px;
-            border-radius: 11px;
-            color: #60758a;
+            padding: 9px 12px;
+            border-radius: 12px;
+            color: #5c7086;
             text-decoration: none;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 800;
-            transition: .2s ease;
+            transition: background .2s, color .2s;
         }
-
-        .nav-link i {
-            font-size: 14px;
-        }
-
-        .nav-link:hover {
-            color: var(--azul);
-            background: #f1f7ff;
-            transform: translateY(-1px);
-        }
-
-        .nav-link.active {
-            color: var(--azul);
-            background: #eaf4ff;
-        }
-
-        .nav-link.active::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            bottom: -3px;
-            width: 18px;
-            height: 3px;
-            border-radius: 50px;
-            background: var(--dorado);
-            transform: translateX(-50%);
-        }
+        .nav-link:hover { color: var(--azul); background: var(--azul-claro); }
+        .nav-link.active { color: var(--azul); background: var(--azul-claro); }
 
         .user-pill {
+            margin-left: auto;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            min-width: 145px;
-            padding: 6px 10px 6px 7px;
-            border: 1px solid #e3edf7;
+            gap: 9px;
+            padding: 5px 14px 5px 5px;
             border-radius: 50px;
-            background: #f8fbff;
+            background: var(--crema-2);
+            border: 1px solid var(--borde);
         }
 
         .user-pill-icon {
-            width: 31px;
-            height: 31px;
-            display: grid;
-            place-items: center;
-            flex: 0 0 31px;
+            width: 34px; height: 34px;
+            display: grid; place-items: center;
             border-radius: 50%;
-            color: #9b7014;
+            color: var(--dorado-oscuro);
             background: var(--dorado-claro);
+            font-size: 16px;
         }
 
         .user-pill-text {
-            min-width: 0;
             display: flex;
             flex-direction: column;
-            line-height: 1.1;
+            line-height: 1.15;
+            min-width: 0;
         }
-
         .user-pill-text strong {
-            max-width: 105px;
+            max-width: 130px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-size: 13px;
             color: var(--azul-profundo);
-            font-size: 10px;
         }
-
-        .user-pill-text small {
-            margin-top: 3px;
-            color: var(--texto-suave);
-            font-size: 9px;
-        }
+        .user-pill-text small { font-size: 11px; color: var(--texto-suave); font-weight: 600; }
 
         .nav-toggle {
             display: none;
-            width: 39px;
-            height: 39px;
+            width: 42px; height: 42px;
             border: 0;
-            border-radius: 11px;
+            border-radius: 12px;
             color: var(--azul);
-            background: #eaf4ff;
-            font-size: 21px;
+            background: var(--azul-claro);
+            font-size: 22px;
             cursor: pointer;
+            place-items: center;
         }
 
+        /* =========================================================
+           PROGRESO
+        ========================================================= */
         .journey-bar {
-            margin: 0 2px 14px;
-            padding: 11px 15px 10px;
-            border: 1px solid rgba(255,255,255,.9);
-            border-radius: 17px;
-            background: rgba(255,255,255,.88);
-            box-shadow: 0 9px 24px rgba(20,62,105,.07);
-            backdrop-filter: blur(12px);
-        }
-
-        .journey-top,
-        .journey-steps {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            margin: 0 0 16px;
+            padding: 14px 18px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .85);
+            border: 1px solid rgba(255, 255, 255, .95);
+            box-shadow: var(--sombra-suave);
         }
 
         .journey-top {
-            margin-bottom: 7px;
-            color: var(--texto-suave);
-            font-size: 10px;
-            font-weight: 750;
-        }
-
-        .journey-top span {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: space-between;
+            margin-bottom: 9px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--texto-suave);
         }
-
-        .journey-top i {
-            color: var(--azul);
-        }
-
-        .journey-top strong {
-            color: var(--azul);
-            font-size: 10px;
-        }
+        .journey-top span { display: inline-flex; align-items: center; gap: 7px; }
+        .journey-top i { color: var(--azul); }
+        .journey-top strong { color: var(--azul); font-weight: 900; }
 
         .journey-track {
-            height: 5px;
-            overflow: hidden;
+            height: 8px;
             border-radius: 50px;
-            background: #e9f0f7;
+            background: #f0e8d8;
+            overflow: hidden;
         }
-
         .journey-progress {
             display: block;
             width: 66%;
             height: 100%;
             border-radius: inherit;
-            background: linear-gradient(90deg,var(--azul),#4d8ed5,var(--dorado));
+            background: linear-gradient(90deg, var(--azul), #4d8ed5, var(--dorado));
         }
 
         .journey-steps {
-            margin-top: 7px;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
             gap: 8px;
         }
-
         .journey-step {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            color: #91a0af;
-            font-size: 9px;
-            font-weight: 750;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #a2adb9;
         }
-
-        .journey-step i {
-            font-size: 11px;
-        }
-
-        .journey-step.done {
-            color: var(--verde);
-        }
-
-        .journey-step.current {
-            color: var(--azul);
-        }
+        .journey-step.done { color: var(--verde); }
+        .journey-step.current { color: var(--azul); }
 
         /* =========================================================
-           MAIN
+           TARJETA PRINCIPAL
         ========================================================= */
-
         .main-card {
             position: relative;
             overflow: hidden;
-            background: rgba(255,255,255,.96);
-            border: 1px solid rgba(255,255,255,.9);
-            border-radius: 24px;
-            box-shadow: 0 18px 45px rgba(20,62,105,.11);
-            padding: 28px 30px 24px;
-            backdrop-filter: blur(15px);
+            padding: 34px 32px 26px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, .96);
+            border: 1px solid #fff;
+            box-shadow: var(--sombra-media);
         }
-
-
-        /* =========================================================
-           TOP DECORATIVE LINE
-        ========================================================= */
 
         .top-line {
-
             position: absolute;
-
-            top: 0;
-            left: 0;
-
-            width: 100%;
-            height: 5px;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    var(--azul),
-                    #4d8ed5,
-                    var(--dorado)
-                );
+            inset: 0 0 auto 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--azul), #4d8ed5, var(--dorado));
         }
-
 
         /* =========================================================
            INTRO
         ========================================================= */
-
         .intro {
-            max-width: 680px;
-            margin: 0 auto 26px;
+            max-width: 640px;
+            margin: 0 auto 28px;
             text-align: center;
         }
 
-
         .intro-tag {
-
             display: inline-flex;
-
             align-items: center;
-
             gap: 7px;
-
-            padding:
-                7px
-                13px;
-
             margin-bottom: 14px;
-
+            padding: 7px 14px;
             border-radius: 50px;
-
-            background:
-                var(--dorado-claro);
-
-            color:
-                #9b7014;
-
-            font-size: 11px;
-
-            font-weight: 850;
-
-            letter-spacing: .4px;
-
-            text-transform: uppercase;
+            background: var(--dorado-claro);
+            color: var(--dorado-oscuro);
+            font-size: 13px;
+            font-weight: 800;
         }
-
-
-        .intro-tag i {
-
-            font-size: 14px;
-        }
-
 
         .intro h2 {
-            color: var(--azul-profundo);
-            font-size: 29px;
-            line-height: 1.15;
-            font-weight: 850;
+            margin-bottom: 10px;
+            font-size: clamp(28px, 4.2vw, 40px);
+            line-height: 1.1;
+            font-weight: 900;
             letter-spacing: -.5px;
-            margin-bottom: 9px;
+            color: var(--azul-profundo);
         }
-
 
         .intro p {
+            font-size: 16px;
+            line-height: 1.6;
             color: var(--texto-suave);
-            font-size: 13px;
-            line-height: 1.55;
+            font-weight: 600;
         }
-
-
-        /* =========================================================
-           MINI EXPLICACIÓN
-        ========================================================= */
 
         .intro-helper {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            margin-top: 12px;
-            padding: 7px 11px;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 8px 14px;
             border-radius: 50px;
-            background: #f4f8fd;
-            color: #60758a;
-            font-size: 11px;
+            background: var(--crema);
+            border: 1px dashed #e0cfa8;
+            color: #7a6a48;
+            font-size: 13px;
             font-weight: 700;
-            border: 1px solid #e4edf6;
         }
-
-
-        .intro-helper i {
-
-            color:
-                var(--azul);
-        }
-
+        .intro-helper i { color: var(--azul); font-size: 15px; }
 
         /* =========================================================
            ERROR
         ========================================================= */
-
         .alert {
-
             display: flex;
-
             align-items: flex-start;
-
             gap: 11px;
-
             margin-bottom: 24px;
-
             padding: 14px 16px;
-
             border-radius: 14px;
-
-            background: #fff3f3;
-
-            border:
-                1px solid #f2cccc;
-
-            color:
-                #a33a3a;
-
-            font-size: 13px;
-
-            line-height: 1.5;
+            background: #fff3f1;
+            border: 1px solid #f4cfc9;
+            color: #a3382d;
+            font-size: 14px;
+            font-weight: 600;
         }
-
-
-        .alert i {
-
-            font-size: 18px;
-
-            flex-shrink: 0;
-        }
-
+        .alert i { font-size: 19px; flex-shrink: 0; }
 
         /* =========================================================
-           AVATAR GRID
+           GRID DE AVATARES
         ========================================================= */
-
         .avatars-grid {
             display: grid;
             grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 14px;
+            gap: 16px;
         }
-
-
-        /* =========================================================
-           AVATAR OPTION
-        ========================================================= */
 
         .avatar-option {
             position: relative;
-            display: block;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
             cursor: pointer;
-            border: 2px solid transparent;
-            border-radius: 18px;
-            background: #ffffff;
-            box-shadow: 0 7px 18px rgba(25,64,105,.075);
-            transition: transform .22s ease, border-color .22s ease,
-                        box-shadow .22s ease, background .22s ease;
+            border: 3px solid transparent;
+            border-radius: var(--radio);
+            background: var(--blanco);
+            box-shadow: var(--sombra-suave);
+            transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        .avatar-option:nth-child(4n+1) .avatar-image {
-            background: linear-gradient(145deg,#edf6ff,#ffffff);
-        }
-
-        .avatar-option:nth-child(4n+2) .avatar-image {
-            background: linear-gradient(145deg,#fff8df,#ffffff);
-        }
-
-        .avatar-option:nth-child(4n+3) .avatar-image {
-            background: linear-gradient(145deg,#eafaf4,#ffffff);
-        }
-
-        .avatar-option:nth-child(4n) .avatar-image {
-            background: linear-gradient(145deg,#f2edff,#ffffff);
-        }
-
 
         .avatar-option:hover {
-            transform: translateY(-5px) rotate(-.6deg);
-            border-color: #b8d1ea;
-            box-shadow: 0 15px 28px rgba(25,64,105,.13);
+            transform: translateY(-4px);
+            border-color: #f3dca0;
+            box-shadow: 0 16px 30px rgba(90, 60, 10, .14);
         }
-
-        .avatar-option:nth-child(even):hover {
-            transform: translateY(-5px) rotate(.6deg);
-        }
-
 
         .avatar-option.selected {
-            transform: translateY(-5px) scale(1.015);
+            transform: translateY(-4px);
             border-color: var(--azul);
-            background: linear-gradient(180deg,#ffffff 0%,#edf6ff 100%);
-            box-shadow: 0 16px 32px rgba(22,87,163,.18);
+            box-shadow: 0 0 0 4px rgba(240, 189, 69, .45), 0 18px 34px rgba(22, 87, 163, .22);
         }
 
-
-        /* =========================================================
-           RADIO
-        ========================================================= */
+        .avatar-option:has(input:focus-visible) {
+            outline: 3px solid var(--dorado);
+            outline-offset: 3px;
+        }
 
         .avatar-option input {
-
             position: absolute;
-
             opacity: 0;
-
             pointer-events: none;
         }
 
-
-        /* =========================================================
-           IMAGE AREA
-        ========================================================= */
-
+        /* Fondos pastel cálidos que rotan */
         .avatar-image {
             position: relative;
-            height: 205px;
             display: flex;
             align-items: flex-end;
             justify-content: center;
+            aspect-ratio: 4 / 5;
             overflow: hidden;
-            padding: 7px 8px 0;
-            background: #f7fbff;
+            padding: 10px 10px 0;
+            background: linear-gradient(160deg, #e9f3ff, #ffffff);
         }
-
-
-        /* decorative circle */
+        .avatar-option:nth-child(4n+2) .avatar-image { background: linear-gradient(160deg, #fff3d0, #fffdf6); }
+        .avatar-option:nth-child(4n+3) .avatar-image { background: linear-gradient(160deg, #e3f7ee, #fbfffd); }
+        .avatar-option:nth-child(4n)   .avatar-image { background: linear-gradient(160deg, #fde9e4, #fffafa); }
 
         .avatar-image::before {
             content: "";
             position: absolute;
-            width: 135px;
-            height: 135px;
+            width: 78%;
+            aspect-ratio: 1;
+            bottom: -34%;
             border-radius: 50%;
-            bottom: -70px;
-            background: rgba(22,87,163,.07);
+            background: rgba(255, 255, 255, .7);
         }
 
-
         .avatar-image img {
-
             position: relative;
-
             z-index: 1;
-
             width: 100%;
-
             height: 100%;
-
             object-fit: contain;
-
-            object-position:
-                center bottom;
-
-            transition:
-                transform .35s ease;
+            object-position: center bottom;
+            transition: transform .35s ease;
         }
-
-
-        .avatar-option:hover
-        .avatar-image img {
-
-            transform:
-                scale(1.055)
-                translateY(-3px);
+        .avatar-option:hover .avatar-image img,
+        .avatar-option.selected .avatar-image img {
+            transform: scale(1.05) translateY(-3px);
         }
-
-
-        .avatar-option.selected
-        .avatar-image img {
-
-            transform:
-                scale(1.05)
-                translateY(-3px);
-        }
-
-
-        /* =========================================================
-           NAME
-        ========================================================= */
 
         .avatar-info {
             position: relative;
             z-index: 2;
-            padding: 10px 8px 12px;
+            flex: 1;
+            padding: 12px 10px 14px;
             text-align: center;
-            border-top: 1px solid #edf1f5;
-            background: rgba(255,255,255,.95);
+            background: #fff;
+            border-top: 1px solid #f3ead8;
         }
-
 
         .avatar-info h3 {
-            color: var(--azul-profundo);
-            font-size: 14px;
-            font-weight: 850;
             margin-bottom: 3px;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--azul-profundo);
         }
 
-
         .avatar-info p {
-            color: var(--texto-suave);
-            font-size: 10px;
-            line-height: 1.35;
-            min-height: 27px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            font-size: 12.5px;
+            line-height: 1.4;
+            color: var(--texto-suave);
+            font-weight: 600;
         }
 
-
-        /* =========================================================
-           SELECTED BADGE
-        ========================================================= */
-
+        /* Check de seleccionado */
         .selected-check {
             position: absolute;
             z-index: 5;
-            top: 8px;
-            right: 8px;
-            width: 29px;
-            height: 29px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 10px; right: 10px;
+            width: 32px; height: 32px;
+            display: grid;
+            place-items: center;
             border-radius: 50%;
             background: var(--azul);
-            color: white;
+            color: #fff;
+            font-size: 16px;
             opacity: 0;
-            transform: scale(.65);
-            box-shadow: 0 7px 17px rgba(22,87,163,.30);
-            transition: opacity .25s ease, transform .25s ease;
+            transform: scale(.5);
+            box-shadow: 0 6px 16px rgba(22, 87, 163, .35);
+            transition: opacity .25s ease, transform .3s cubic-bezier(.34, 1.56, .64, 1);
         }
-
-
-        .selected-check::after {
-
-            content: "";
-
-            position: absolute;
-
-            inset: -5px;
-
-            border:
-                2px solid rgba(240,189,69,.65);
-
-            border-radius: 50%;
-        }
-
-
-        .avatar-option.selected
-        .selected-check {
-
-            opacity: 1;
-
-            transform:
-                scale(1);
-        }
-
+        .avatar-option.selected .selected-check { opacity: 1; transform: scale(1); }
 
         /* =========================================================
-           SELECTION PANEL
+           PANEL DE SELECCIÓN
         ========================================================= */
-
         .selection-panel {
-            margin-top: 20px;
-            padding: 12px 14px;
+            position: sticky;
+            bottom: 14px;
+            z-index: 50;
+            margin-top: 24px;
+            padding: 14px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 14px;
-            border: 1px solid #dce8f4;
-            border-radius: 15px;
-            background: linear-gradient(135deg,#f7fbff,#eef6ff);
+            gap: 16px;
+            border-radius: 20px;
+            background: rgba(255, 250, 238, .96);
+            border: 1px solid var(--borde);
+            box-shadow: 0 12px 30px rgba(90, 60, 10, .14);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
-
 
         .selection-message {
-
             display: flex;
-
             align-items: center;
-
-            gap: 12px;
+            gap: 13px;
+            min-width: 0;
         }
-
 
         .selection-icon {
-            width: 36px;
-            height: 36px;
+            width: 44px; height: 44px;
             flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 11px;
-            background: white;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: #fff;
             color: var(--azul);
-            box-shadow: 0 5px 15px rgba(22,87,163,.08);
-            font-size: 17px;
+            font-size: 21px;
+            box-shadow: 0 5px 14px rgba(22, 87, 163, .10);
         }
-
+        .selection-icon .bi-check-circle-fill { color: var(--verde); }
 
         .selection-message strong {
-
             display: block;
-
-            color:
-                var(--azul-profundo);
-
-            font-size: 13px;
-
-            margin-bottom: 2px;
+            font-size: 15px;
+            font-weight: 900;
+            color: var(--azul-profundo);
         }
-
-
         .selection-message span {
-
             display: block;
-
-            color:
-                var(--texto-suave);
-
-            font-size: 12px;
+            font-size: 13.5px;
+            color: var(--texto-suave);
+            font-weight: 600;
         }
-
-
-        .selected-name {
-
-            color:
-                var(--azul);
-
-            font-weight: 850;
-        }
-
-
-        /* =========================================================
-           BUTTON
-        ========================================================= */
+        .selected-name { color: var(--azul); font-weight: 900; }
 
         .btn-submit {
-            border: none;
-            min-width: 190px;
-            height: 44px;
-            padding: 0 18px;
-            border-radius: 12px;
-            background: linear-gradient(135deg,#1657a3,#2473c1);
-            color: white;
-            font-family: inherit;
-            font-size: 12px;
-            font-weight: 850;
+            flex-shrink: 0;
+            min-width: 210px;
+            height: 50px;
+            padding: 0 22px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 9px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #1657a3, #2473c1);
+            color: #fff;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 9px 22px rgba(22,87,163,.22);
+            box-shadow: 0 10px 22px rgba(22, 87, 163, .26);
             transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
         }
-
-
+        .btn-submit i { font-size: 18px; transition: transform .2s ease; }
         .btn-submit:hover:not(:disabled) {
-
-            transform:
-                translateY(-2px);
-
-            box-shadow:
-                0 14px 28px rgba(22,87,163,.28);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(22, 87, 163, .32);
         }
-
-
+        .btn-submit:hover:not(:disabled) i { transform: translateX(3px); }
         .btn-submit:disabled {
-
-            opacity: .48;
-
+            opacity: .5;
             cursor: not-allowed;
-
             box-shadow: none;
         }
 
-
-        .btn-submit i {
-
-            font-size: 16px;
-        }
-
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* =========================================================
-           BACK
+           VOLVER
         ========================================================= */
-
-        .back-button {
-
-            text-align: center;
-
-            margin-top: 18px;
-        }
-
-
+        .back-button { text-align: center; margin-top: 14px; }
         .back-button button {
-
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
             border: none;
-
+            border-radius: 50px;
             background: transparent;
-
-            color:
-                #718397;
-
+            color: #6f7f92;
             font-family: inherit;
-
-            font-size: 12px;
-
-            font-weight: 650;
-
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
-
-            padding: 8px 13px;
-
-            transition:
-                color .2s ease;
+            transition: color .2s, background .2s;
         }
-
-
-        .back-button button:hover {
-
-            color:
-                var(--azul);
-        }
-
+        .back-button button:hover { color: var(--azul); background: var(--azul-claro); }
 
         /* =========================================================
-           EMPTY
+           VACÍO
         ========================================================= */
-
-        .empty {
-
-            padding:
-                60px 20px;
-
-            text-align: center;
-
-            color:
-                var(--texto-suave);
-        }
-
-
-        .empty i {
-
-            display: block;
-
-            margin-bottom: 12px;
-
-            color:
-                #9bb2ca;
-
-            font-size: 45px;
-        }
-
-
-        .empty h3 {
-
-            color:
-                var(--azul-profundo);
-
-            font-size: 18px;
-
-            margin-bottom: 5px;
-        }
-
-
-        .empty p {
-
-            font-size: 13px;
-        }
-
+        .empty { padding: 60px 20px; text-align: center; color: var(--texto-suave); }
+        .empty i { display: block; margin-bottom: 12px; font-size: 48px; color: #c9b98f; }
+        .empty h3 { margin-bottom: 6px; font-size: 20px; color: var(--azul-profundo); }
+        .empty p { font-size: 15px; }
 
         /* =========================================================
            RESPONSIVE
         ========================================================= */
-
+        @media (max-width: 1100px) {
+            .avatars-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
 
         @media (max-width: 900px) {
-
-            .header {
-                position: relative;
-                flex-wrap: wrap;
-            }
-
-            .nav-toggle {
-                display: grid;
-                place-items: center;
-                margin-left: auto;
-            }
+            .header { position: relative; top: 0; flex-wrap: wrap; }
+            .nav-toggle { display: grid; margin-left: auto; }
+            .user-pill { margin-left: 0; }
 
             .main-nav {
                 display: none;
                 order: 10;
                 width: 100%;
-                flex-basis: 100%;
-                padding-top: 8px;
-                border-top: 1px solid #edf2f7;
-                justify-content: stretch;
+                padding-top: 10px;
+                border-top: 1px solid #f0e8d8;
             }
+            .main-nav.open { display: grid; grid-template-columns: repeat(2, 1fr); }
+            .nav-link { justify-content: center; }
 
-            .main-nav.open {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .nav-link {
-                justify-content: center;
-            }
-
-            .user-pill {
-                margin-left: auto;
-            }
+            .avatars-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
 
-        @media (max-width: 560px) {
-
-            .header {
-                top: 8px;
-                padding: 8px 9px;
-                border-radius: 17px;
-            }
-
-            .brand {
-                min-width: 0;
-            }
-
-            .brand-logo-wrap {
-                width: 38px;
-                height: 38px;
-                flex-basis: 38px;
-            }
-
-            .brand-logo {
-                width: 32px;
-                height: 32px;
-            }
-
-            .brand-copy h1 {
-                font-size: 16px;
-            }
-
-            .brand-copy p {
-                font-size: 9px;
-            }
-
-            .user-pill {
-                display: none;
-            }
-
-            .journey-bar {
-                margin-top: 8px;
-                padding: 10px 11px;
-            }
-
-            .journey-step {
-                font-size: 8px;
-            }
-
-            .main-nav.open {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .nav-link {
-                padding: 10px 7px;
-                font-size: 10px;
-            }
-        }
-
-        @media (max-width: 1100px) {
-            .avatars-grid {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-        }
-
-
-        @media (max-width: 800px) {
-
-            .page {
-
-                padding:
-                    18px
-                    12px
-                    40px;
-            }
-
-
-            .header {
-
-                border-radius: 16px;
-
-                padding:
-                    12px
-                    14px;
-            }
-
-
-            .brand-logo {
-
-                width: 40px;
-                height: 40px;
-            }
-
-
-            .brand h1 {
-
-                font-size: 17px;
-            }
-
-
-            .brand p {
-
-                font-size: 10px;
-            }
-
-
-            .step {
-
-                padding:
-                    8px
-                    11px;
-
-                font-size: 10px;
-            }
-
-
-            .main-card {
-
-                padding:
-                    30px
-                    20px
-                    22px;
-
-                border-radius: 24px;
-            }
-
-
-            .intro h2 {
-
-                font-size: 28px;
-            }
-
-
-            .avatars-grid {
-
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-
-                gap: 14px;
-            }
-
-
-            .avatar-image {
-
-                height: 245px;
-            }
-
+        @media (max-width: 700px) {
+            .page { padding: 12px 12px 36px; }
+            .main-card { padding: 28px 16px 20px; border-radius: 24px; }
+            .intro { margin-bottom: 22px; }
+            .intro p { font-size: 15px; }
+            .avatars-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+            .avatar-image { aspect-ratio: 1 / 1.05; }
+            .avatar-info h3 { font-size: 15px; }
+            .avatar-info p { font-size: 12px; }
 
             .selection-panel {
-
                 flex-direction: column;
-
                 align-items: stretch;
+                gap: 12px;
+                bottom: 10px;
+                padding: 12px;
             }
-
-
-            .btn-submit {
-
-                width: 100%;
-            }
-
+            .btn-submit { width: 100%; }
         }
 
+        @media (max-width: 480px) {
+            .header { padding: 8px 10px; border-radius: 17px; }
+            .brand-logo-wrap { height: 44px; padding: 3px 8px; }
+            .brand-logo { height: 36px; max-width: 100px; }
+            .brand-copy h1 { font-size: 16px; }
+            .brand-copy p { display: none; }
+            .user-pill { display: none; }
 
-        @media (max-width: 500px) {
+            .journey-bar { padding: 12px 13px; }
+            .journey-step { font-size: 11px; gap: 4px; }
+            .journey-top { font-size: 12px; }
 
-            .header {
+            .main-nav.open { grid-template-columns: 1fr; }
 
-                flex-direction: column;
-
-                align-items: stretch;
-            }
-
-
-            .step {
-
-                justify-content: center;
-            }
-
-
-            .main-card {
-                padding: 22px 10px 18px;
-            }
-
-
-            .intro {
-                margin-bottom: 22px;
-            }
-
-
-            .intro h2 {
-
-                font-size: 25px;
-            }
-
-
-            .intro p {
-
-                font-size: 13px;
-            }
-
-
-            .avatars-grid {
-
-                grid-template-columns: 1fr;
-
-                gap: 15px;
-            }
-
-
-            .avatar-image {
-
-                height: 310px;
-            }
-
-
-            .avatar-info h3 {
-
-                font-size: 18px;
-            }
-
-
-            .selection-message {
-
-                align-items: flex-start;
-            }
-
+            .intro-helper { font-size: 12px; text-align: left; }
+            .selected-check { width: 28px; height: 28px; top: 8px; right: 8px; font-size: 14px; }
         }
 
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
     </style>
-
 </head>
 
 
 <body>
 
-
 <div class="page">
-
     <div class="container">
-
 
         {{-- =====================================================
              HEADER
         ====================================================== --}}
-
         <header class="header">
 
             <a href="{{ url('/') }}" class="brand" aria-label="Ir al inicio de Ponte Pilas">
-
                 <span class="brand-logo-wrap">
-                    <img
-                        src="{{ asset('build/img/logo.webp') }}"
-                        alt="Ponte Pilas"
-                        class="brand-logo"
-                    >
+                    <img src="{{ asset('build/img/logo.webp') }}" alt="Ponte Pilas" class="brand-logo">
                 </span>
 
                 <div class="brand-copy">
                     <h1>Ponte Pilas</h1>
                     <p>Aprende, decide y ponte pilas</p>
                 </div>
-
             </a>
 
-            <button
-                type="button"
-                class="nav-toggle"
-                id="navToggle"
-                aria-label="Abrir menú"
-                aria-expanded="false"
-            >
-                <i class="bi bi-list"></i>
-            </button>
-
             <nav class="main-nav" id="mainNav" aria-label="Navegación principal">
-
-          
+                {{-- Agrega aquí tus enlaces, por ejemplo:
+                <a href="{{ url('/') }}" class="nav-link active"><i class="bi bi-house-heart"></i> Inicio</a>
+                --}}
             </nav>
 
             <div class="user-pill">
-                <span class="user-pill-icon">
-                    <i class="bi bi-stars"></i>
-                </span>
-
+                <span class="user-pill-icon"><i class="bi bi-stars"></i></span>
                 <span class="user-pill-text">
                     <strong>{{ session('participacion_nombre') ?: 'Participante' }}</strong>
                     <small>Tu recorrido</small>
                 </span>
             </div>
 
+            <button type="button" class="nav-toggle" id="navToggle"
+                    aria-label="Abrir menú" aria-expanded="false" aria-controls="mainNav">
+                <i class="bi bi-list"></i>
+            </button>
+
         </header>
 
+
+        {{-- =====================================================
+             PROGRESO
+        ====================================================== --}}
         <div class="journey-bar" aria-label="Progreso de preparación">
 
             <div class="journey-top">
-                <span>
-                    <i class="bi bi-signpost-2"></i>
-                    Preparando tu experiencia
-                </span>
-
-                <strong>1 de 2</strong>
+                <span><i class="bi bi-signpost-2"></i> Preparando tu experiencia</span>
+                <strong>Paso 2 de 3</strong>
             </div>
 
             <div class="journey-track">
@@ -1477,20 +763,9 @@
             </div>
 
             <div class="journey-steps">
-                <span class="journey-step done">
-                    <i class="bi bi-check-circle-fill"></i>
-                    Datos
-                </span>
-
-                <span class="journey-step current">
-                    <i class="bi bi-person-heart"></i>
-                    Personaje
-                </span>
-
-                <span class="journey-step">
-                    <i class="bi bi-controller"></i>
-                    Comenzar
-                </span>
+                <span class="journey-step done"><i class="bi bi-check-circle-fill"></i> Datos</span>
+                <span class="journey-step current"><i class="bi bi-person-heart"></i> Personaje</span>
+                <span class="journey-step"><i class="bi bi-controller"></i> Comenzar</span>
             </div>
 
         </div>
@@ -1499,140 +774,66 @@
         {{-- =====================================================
              MAIN
         ====================================================== --}}
-
         <main class="main-card">
 
             <div class="top-line"></div>
 
-
-            {{-- =================================================
-                 INTRO
-            ================================================== --}}
-
             <div class="intro">
-
                 <div class="intro-tag">
-
                     <i class="bi bi-stars"></i>
-
                     Tu personaje
-
                 </div>
 
-
-                <h2>
-                    ¡Elige a tu compañero!
-                </h2>
-
+                <h2>¡Elige a tu compañero!</h2>
 
                 <p>
-                    Escoge el personaje que más conecte contigo.
-                    Te acompañará durante las actividades y decisiones
-                    de tu recorrido por Ponte Pilas.
+                    Escoge el personaje que más conecte contigo. Te acompañará
+                    durante las actividades y decisiones de tu recorrido por Ponte Pilas.
                 </p>
 
-
                 <div class="intro-helper">
-
-                    <i class="bi bi-hand-index-thumb"></i>
-
                     <i class="bi bi-hand-index-thumb"></i>
                     Toca una tarjeta y descubre cuál te representa
-
                 </div>
-
             </div>
 
 
-            {{-- =================================================
-                 ERROR
-            ================================================== --}}
-
             @if(session('error'))
-
-                <div class="alert">
-
+                <div class="alert" role="alert">
                     <i class="bi bi-exclamation-circle-fill"></i>
-
-                    <div>
-                        {{ session('error') }}
-                    </div>
-
+                    <div>{{ session('error') }}</div>
                 </div>
-
             @endif
 
 
-            {{-- =================================================
-                 FORMULARIO
-            ================================================== --}}
-
-            <form
-                action="{{ route('participacion.avatar.guardar') }}"
-                method="POST"
-                id="avatarForm"
-            >
-
+            <form action="{{ route('participacion.avatar.guardar') }}" method="POST" id="avatarForm">
                 @csrf
-
-
-                {{-- =================================================
-                     AVATARES
-                ================================================== --}}
 
                 @if($avatares->count())
 
-                    <div class="avatars-grid" id="avatares">
+                    <div class="avatars-grid" id="avatares" role="radiogroup" aria-label="Personajes disponibles">
 
                         @foreach($avatares as $avatar)
 
-                            <label
-                                class="avatar-option"
-                                data-avatar-id="{{ $avatar->id }}"
-                                data-avatar-name="{{ $avatar->nombre }}"
-                            >
+                            <label class="avatar-option"
+                                   data-avatar-id="{{ $avatar->id }}"
+                                   data-avatar-name="{{ $avatar->nombre }}">
 
-                                <input
-                                    type="radio"
-                                    name="avatar_id"
-                                    value="{{ $avatar->id }}"
-                                >
+                                <input type="radio" name="avatar_id" value="{{ $avatar->id }}">
 
-
-                                {{-- CHECK --}}
-
-                                <div class="selected-check">
-
+                                <div class="selected-check" aria-hidden="true">
                                     <i class="bi bi-check-lg"></i>
-
                                 </div>
-
-
-                                {{-- IMAGEN --}}
 
                                 <div class="avatar-image">
-
-                                    <img
-                                        src="{{ asset('build/img/avatars/' . trim($avatar->imagen)) }}"
-                                        alt="{{ $avatar->nombre }}"
-                                        loading="lazy"
-                                    >
-
+                                    <img src="{{ asset('build/img/avatars/' . trim($avatar->imagen)) }}"
+                                         alt="{{ $avatar->nombre }}"
+                                         loading="lazy">
                                 </div>
 
-
-                                {{-- INFORMACIÓN --}}
-
                                 <div class="avatar-info">
-
-                                    <h3>
-                                        {{ $avatar->nombre }}
-                                    </h3>
-
-                                    <p>
-                                        {{ $avatar->descripcion ?? 'Tu compañero durante esta experiencia.' }}
-                                    </p>
-
+                                    <h3>{{ $avatar->nombre }}</h3>
+                                    <p>{{ $avatar->descripcion ?? 'Tu compañero durante esta experiencia.' }}</p>
                                 </div>
 
                             </label>
@@ -1644,254 +845,103 @@
                 @else
 
                     <div class="empty">
-
                         <i class="bi bi-person-x"></i>
-
-                        <h3>
-                            No hay avatares disponibles
-                        </h3>
-
-                        <p>
-                            En este momento no hay personajes disponibles.
-                        </p>
-
+                        <h3>No hay avatares disponibles</h3>
+                        <p>En este momento no hay personajes disponibles. Vuelve a intentarlo más tarde.</p>
                     </div>
 
                 @endif
 
 
-                {{-- =================================================
-                     SELECCIÓN
-                ================================================== --}}
-
-                <div class="selection-panel">
+                <div class="selection-panel" aria-live="polite">
 
                     <div class="selection-message">
-
                         <div class="selection-icon">
-
-                            <i
-                                class="bi bi-person-check"
-                                id="selectionIcon"
-                            ></i>
-
+                            <i class="bi bi-person-check" id="selectionIcon"></i>
                         </div>
-
 
                         <div>
-
-                            <strong id="selectionTitle">
-                                Aún no has elegido
-                            </strong>
-
-                            <span id="selectionText">
-                                Tu personaje aparecerá durante el recorrido.
-                            </span>
-
+                            <strong id="selectionTitle">Aún no has elegido</strong>
+                            <span id="selectionText">Selecciona un personaje para continuar.</span>
                         </div>
-
                     </div>
 
-
-                    <button
-                        type="submit"
-                        class="btn-submit"
-                        id="btnContinuar"
-                        disabled
-                    >
-
-                        <span>
-                            Elegir y comenzar
-                        </span>
-
+                    <button type="submit" class="btn-submit" id="btnContinuar" disabled>
+                        <span>Elegir y comenzar</span>
                         <i class="bi bi-arrow-right"></i>
-
                     </button>
 
                 </div>
 
-
             </form>
 
 
-            {{-- =================================================
-                 VOLVER
-            ================================================== --}}
-
             <div class="back-button">
-
-                <button
-                    type="button"
-                    onclick="window.history.back()"
-                >
-
+                <button type="button" onclick="window.history.back()">
                     <i class="bi bi-arrow-left"></i>
-
                     Volver al formulario
-
                 </button>
-
             </div>
-
 
         </main>
 
     </div>
-
 </div>
 
 
 <script>
+    (function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | ELEMENTOS
-    |--------------------------------------------------------------------------
-    */
+        const avatarOptions  = document.querySelectorAll('.avatar-option');
+        const btnContinuar   = document.getElementById('btnContinuar');
+        const selectionTitle = document.getElementById('selectionTitle');
+        const selectionText  = document.getElementById('selectionText');
+        const selectionIcon  = document.getElementById('selectionIcon');
+        const avatarForm     = document.getElementById('avatarForm');
+        const navToggle      = document.getElementById('navToggle');
+        const mainNav        = document.getElementById('mainNav');
 
-    const avatarOptions =
-        document.querySelectorAll('.avatar-option');
+        /* ---------------------------------------------------------
+           Seleccionar avatar (el label ya activa el radio;
+           escuchamos "change" y también funciona con teclado)
+        --------------------------------------------------------- */
+        function marcar(card) {
+            avatarOptions.forEach(function (item) {
+                item.classList.toggle('selected', item === card);
+            });
 
-    const btnContinuar =
-        document.getElementById('btnContinuar');
+            selectionTitle.textContent = 'Has elegido a';
 
-    const selectionTitle =
-        document.getElementById('selectionTitle');
+            selectionText.textContent = '';
+            const nombre = document.createElement('span');
+            nombre.className = 'selected-name';
+            nombre.textContent = card.dataset.avatarName;
+            selectionText.append(nombre, ' te acompañará durante el recorrido.');
 
-    const selectionText =
-        document.getElementById('selectionText');
+            selectionIcon.className = 'bi bi-check-circle-fill';
+            btnContinuar.disabled = false;
+        }
 
-    const selectionIcon =
-        document.getElementById('selectionIcon');
+        avatarOptions.forEach(function (card) {
+            const radio = card.querySelector('input[type="radio"]');
+            radio.addEventListener('change', function () {
+                if (radio.checked) marcar(card);
+            });
+        });
 
-    const avatarForm =
-        document.getElementById('avatarForm');
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | SELECCIONAR AVATAR
-    |--------------------------------------------------------------------------
-    */
-
-    avatarOptions.forEach(function(card) {
-
-        card.addEventListener(
-            'click',
-            function() {
-
-
-                /*
-                |------------------------------------------------------
-                | Quitar selección anterior
-                |------------------------------------------------------
-                */
-
-                avatarOptions.forEach(function(item) {
-
-                    item.classList.remove(
-                        'selected'
-                    );
-
-                });
-
-
-                /*
-                |------------------------------------------------------
-                | Seleccionar tarjeta
-                |------------------------------------------------------
-                */
-
-                card.classList.add(
-                    'selected'
-                );
-
-
-                /*
-                |------------------------------------------------------
-                | Marcar radio
-                |------------------------------------------------------
-                */
-
-                const radio =
-                    card.querySelector(
-                        'input[type="radio"]'
-                    );
-
-
-                radio.checked = true;
-
-
-                /*
-                |------------------------------------------------------
-                | Obtener nombre
-                |------------------------------------------------------
-                */
-
-                const avatarName =
-                    card.dataset.avatarName;
-
-
-                /*
-                |------------------------------------------------------
-                | Actualizar panel
-                |------------------------------------------------------
-                */
-
-                selectionTitle.textContent =
-                    'Has elegido a';
-
-
-                selectionText.innerHTML =
-                    `
-                        <span class="selected-name">
-                            ${avatarName}
-                        </span>
-                        te acompañará durante el recorrido.
-                    `;
-
-
-                selectionIcon.className =
-                    'bi bi-check-circle-fill';
-
-
-                /*
-                |------------------------------------------------------
-                | Activar botón
-                |------------------------------------------------------
-                */
-
-                btnContinuar.disabled =
-                    false;
-
-            }
-        );
-
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | ENVÍO
-    |--------------------------------------------------------------------------
-    */
-
-
-        // ---------------------------------------------------------
-        // MENÚ MÓVIL
-        // ---------------------------------------------------------
-        const navToggle = document.getElementById('navToggle');
-        const mainNav = document.getElementById('mainNav');
-
+        /* ---------------------------------------------------------
+           Menú móvil (se oculta si no hay enlaces)
+        --------------------------------------------------------- */
         if (navToggle && mainNav) {
+
+            if (!mainNav.querySelector('.nav-link')) {
+                navToggle.style.display = 'none';
+                mainNav.style.display = 'none';
+            }
+
             navToggle.addEventListener('click', function () {
                 const abierto = mainNav.classList.toggle('open');
-
-                navToggle.setAttribute(
-                    'aria-expanded',
-                    abierto ? 'true' : 'false'
-                );
-
+                navToggle.setAttribute('aria-expanded', abierto ? 'true' : 'false');
                 navToggle.innerHTML = abierto
                     ? '<i class="bi bi-x-lg"></i>'
                     : '<i class="bi bi-list"></i>';
@@ -1906,58 +956,24 @@
             });
         }
 
-        // ---------------------------------------------------------
-        // AVATAR: PEQUEÑA INTERACCIÓN AL SELECCIONAR
-        // ---------------------------------------------------------
-        avatarOptions.forEach(function (card) {
-            card.setAttribute('tabindex', '0');
+        /* ---------------------------------------------------------
+           Envío: evitar doble clic
+        --------------------------------------------------------- */
+        avatarForm.addEventListener('submit', function (event) {
 
-            card.addEventListener('keydown', function (event) {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    card.click();
-                }
-            });
-        });
-
-    avatarForm.addEventListener(
-        'submit',
-        function(event) {
-
-
-            const selected =
-                document.querySelector(
-                    'input[name="avatar_id"]:checked'
-                );
-
-
-            if (!selected) {
-
+            if (!document.querySelector('input[name="avatar_id"]:checked')) {
                 event.preventDefault();
-
                 return;
-
             }
 
+            btnContinuar.disabled = true;
+            btnContinuar.innerHTML =
+                '<span>Preparando tu experiencia...</span>' +
+                '<i class="bi bi-arrow-repeat spin"></i>';
+        });
 
-            /*
-            | Evitar doble envío
-            */
-
-            btnContinuar.disabled =
-                true;
-
-
-            btnContinuar.innerHTML = `
-                <span>Preparando tu experiencia...</span>
-                <i class="bi bi-arrow-repeat"></i>
-            `;
-
-        }
-    );
-
+    })();
 </script>
-
 
 </body>
 

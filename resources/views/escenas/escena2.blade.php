@@ -1,1274 +1,811 @@
+{{-- Escena educativa: Entender por qué. El contenido sigue la información entregada por el usuario. --}}
+@php
+    $escenaActual = isset($escenaActual) ? (int) $escenaActual : 2;
+    $totalEscenas = 4;
+    // Posición (0-100) de cada nivel sobre la barra
+    $posicion = fn ($n) => (($n - 1) / max($totalEscenas - 1, 1)) * 100;
+    $porcentajeRecorrido = $posicion($escenaActual);
+
+    /*
+     * Recuperar el avatar guardado al finalizar la selección.
+     * ParticipacionController guarda participacion_id y participante_avatar_id
+     * en la sesión, y Participantes tiene la relación avatar().
+     */
+    $participanteActual = null;
+
+    if (session()->has('participacion_id') && session('participacion_id')) {
+        $participanteActual = \App\Models\Participantes::with('avatar')
+            ->find(session('participacion_id'));
+    }
+
+    $avatarSeleccionado = $avatarSeleccionado
+        ?? optional($participanteActual)->avatar;
+
+    if (!$avatarSeleccionado && session()->has('participante_avatar_id') && session('participante_avatar_id')) {
+        $avatarSeleccionado = \App\Models\Avatar::find(session('participante_avatar_id'));
+    }
+
+    $avatarNombre = optional($avatarSeleccionado)->nombre ?: 'Tu compañero';
+
+    // La tabla avatares guarda el nombre de archivo en la columna imagen.
+    $avatarArchivo = $avatarImagen
+        ?? (isset($avatarSeleccionado) ? ($avatarSeleccionado->imagen ?? $avatarSeleccionado->ruta ?? null) : null)
+        ?? session('avatar_imagen')
+        ?? 'cuerpo.webp';
+
+    if (str_starts_with($avatarArchivo, 'http://') || str_starts_with($avatarArchivo, 'https://')) {
+        $avatarRuta = $avatarArchivo;
+    } elseif (str_starts_with($avatarArchivo, '/')) {
+        $avatarRuta = asset(ltrim($avatarArchivo, '/'));
+    } elseif (str_starts_with($avatarArchivo, 'build/')) {
+        $avatarRuta = asset($avatarArchivo);
+    } else {
+        $avatarRuta = asset('build/img/avatars/' . ltrim($avatarArchivo, '/'));
+    }
+
+    $avatarFallback = asset('build/img/avatars/cuerpo.webp');
+
+    // Etapas del recorrido
+    $etapas = ['Reconocer','Entender','Hablar','Prevenir'];
+
+    // Factores: icono, título, texto y dato destacado (opcional)
+    $factores = [
+        ['bi-people-fill',  'Presión del grupo',        'El 68% de adolescentes colombianos consume por primera vez con amigos.', '68%'],
+        ['bi-emoji-frown',  'Vacíos emocionales',       'Ansiedad, soledad y baja autoestima son los factores individuales más frecuentes.', null],
+        ['bi-house-heart',  'Modelo en casa',           'Si en el hogar se consume habitualmente, el riesgo de inicio temprano se multiplica por 3.', '×3'],
+        ['bi-tools',        'Cerebro en construcción',  'El lóbulo prefrontal no termina de formarse hasta los 25 años.', '25 años'],
+        ['bi-tv',           'Normalización cultural',   'Series, canciones y reuniones presentan el alcohol como algo inevitable.', null],
+        ['bi-search',       'Curiosidad natural',       'Explorar límites es parte de crecer. El riesgo está en no tener criterio.', null],
+    ];
+
+    // Escenario: la pregunta que incomoda
+    $preguntaHijo = '¿Por qué tú sí puedes tomar y yo no?';
+    $respuestaCierra = 'Porque yo soy adulto y mando aquí. Cuando tengas 18 hablamos.';
+    $respuestaAbre = 'Tienes razón en preguntar. Mi cerebro ya terminó de formarse — el tuyo está en construcción hasta los 25. Es un “todavía no” que viene del cuidado.';
+
+    // Preguntas del cuestionario ('por' = mensaje específico según la opción elegida)
+    $preguntas = [
+        [
+            'texto' => '¿Cuál es el factor de riesgo individual más fuerte para el inicio del consumo en Colombia?',
+            'opciones' => [
+                'Tener bajas calificaciones académicas.',
+                'Vacíos emocionales como ansiedad, soledad o baja autoestima.',
+                'No tener dinero para consumir.',
+                'Vivir en una ciudad grande.',
+            ],
+            'correcta' => 1,
+            'ok'  => 'Ansiedad, soledad y baja autoestima son los factores individuales más frecuentes.',
+            'mal' => 'La respuesta correcta son los vacíos emocionales como ansiedad, soledad o baja autoestima.',
+            'por' => [0 => 'Las notas bajas son consecuencia, no causa principal.'],
+        ],
+        [
+            'texto' => '¿Por qué el cerebro adolescente evalúa el riesgo diferente al adulto?',
+            'opciones' => [
+                'Porque son naturalmente rebeldes por actitud.',
+                'Porque el lóbulo prefrontal (juicio y autocontrol) no madura hasta los 25 años.',
+                'Porque tienen menor inteligencia.',
+                'Porque producen más hormonas.',
+            ],
+            'correcta' => 1,
+            'ok'  => 'El lóbulo prefrontal, responsable del juicio y el autocontrol, sigue madurando hasta los 25 años.',
+            'mal' => 'La respuesta correcta es que el lóbulo prefrontal (juicio y autocontrol) no madura hasta los 25 años.',
+            'por' => [2 => 'La inteligencia no tiene relación directa con la madurez prefrontal.'],
+        ],
+    ];
+    $letras = ['A','B','C','D'];
+
+    // Siguiente nivel. AJUSTA la URL a tu ruta real (o pásala desde el controlador como $urlSiguiente).
+    $hayNivelSiguiente = $escenaActual < $totalEscenas;
+    // Rutas de las escenas: la 1 vive en /escena y las demás en /aprende/escena/{n}
+    $rutaEscena = fn ($n) => $n <= 1 ? url('/escena') : url('/aprende/escena/' . $n);
+    $urlSiguiente = $urlSiguiente ?? ($hayNivelSiguiente ? $rutaEscena($escenaActual + 1) : url('/aprende'));
+    $posSiguiente = $hayNivelSiguiente ? $posicion($escenaActual + 1) : 100;
+    $nombreMedalla = 'Explorador de causas';
+    // Copia medalla.webp en public/build/img/ (o pasa $medallaImagen desde el controlador)
+    $medallaImagen = $medallaImagen ?? asset('build/img/medalla.webp');
+    // Clave para recordar las respuestas de este participante en esta escena
+    $claveQuiz = 'pp_quiz_' . (session('participacion_id') ?: 'anon') . '_' . $escenaActual;
+    $urlAnterior = $urlAnterior ?? ($escenaActual > 1 ? $rutaEscena($escenaActual - 1) : url('/aprende'));
+@endphp
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entender por qué | Aprende</title>
 
-    <title>Escena 2 | Aprende | Ponte Pilas</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        * { box-sizing: border-box; }
-
-        :root {
-            --navy:#06152e;
-            --navy2:#0b2851;
-            --blue:#1769ff;
-            --blue2:#58c6ff;
-            --yellow:#ffd447;
-            --white:#fff;
-            --ink:#102442;
-            --muted:#687993;
-            --glass:rgba(6,21,46,.70);
-            --line:rgba(255,255,255,.14);
-        }
-
-        html, body {
-            margin:0;
-            min-height:100%;
-            font-family:Inter,"Segoe UI",Arial,sans-serif;
-        }
-
-        body {
-            background:var(--navy);
-            color:var(--ink);
-            overflow-x:hidden;
-        }
-
-        button { font:inherit; }
-
-        .learn {
-            min-height:100vh;
-            position:relative;
-            overflow:hidden;
-            background:var(--navy);
-        }
-
-        .background {
-            position:absolute;
-            inset:0;
-            z-index:0;
-            background:
-                linear-gradient(90deg,
-                    rgba(4,15,35,.90) 0%,
-                    rgba(4,15,35,.58) 38%,
-                    rgba(4,15,35,.45) 70%,
-                    rgba(4,15,35,.66) 100%),
-                url("{{ asset('build/img/fondo.webp') }}") center/cover no-repeat;
-        }
-
-        .background::after {
-            content:"";
-            position:absolute;
-            inset:0;
-            background:
-                radial-gradient(circle at 74% 24%, rgba(88,198,255,.16), transparent 28%),
-                linear-gradient(180deg, rgba(3,13,30,.10), rgba(3,13,30,.40));
-            pointer-events:none;
-        }
-
-        .page {
-            position:relative;
-            z-index:2;
-            min-height:100vh;
-            width:min(1420px,100%);
-            margin:auto;
-            padding:24px 30px 34px;
-        }
-
-        .topbar {
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:20px;
-            color:#fff;
-        }
-
-        .brand {
-            display:flex;
-            align-items:center;
-            gap:14px;
-        }
-
-        .back {
-            width:46px;
-            height:46px;
-            border:1px solid var(--line);
-            border-radius:15px;
-            background:rgba(5,20,43,.62);
-            color:#fff;
-            display:grid;
-            place-items:center;
-            text-decoration:none;
-            backdrop-filter:blur(14px);
-            transition:.22s ease;
-            flex-shrink:0;
-        }
-
-        .back:hover {
-            background:var(--blue);
-            color:#fff;
-            transform:translateY(-2px);
-        }
-
-        .back i { font-size:20px; }
-
-        .brand-title {
-            font-size:20px;
-            font-weight:900;
-            letter-spacing:-.4px;
-        }
-
-        .brand-subtitle {
-            margin-top:2px;
-            font-size:11px;
-            font-weight:700;
-            color:rgba(255,255,255,.62);
-        }
-
-        .counter {
-            display:flex;
-            align-items:center;
-            gap:7px;
-            padding:10px 15px;
-            border:1px solid var(--line);
-            border-radius:15px;
-            background:rgba(5,20,43,.62);
-            backdrop-filter:blur(14px);
-            color:rgba(255,255,255,.65);
-            font-size:10px;
-            font-weight:900;
-            letter-spacing:1.3px;
-            flex-shrink:0;
-        }
-
-        .counter strong {
-            color:var(--yellow);
-            font-size:16px;
-        }
-
-        .xp-panel {
-            margin:18px 0 16px;
-            padding:13px 17px;
-            border:1px solid var(--line);
-            border-radius:18px;
-            background:rgba(5,20,43,.56);
-            backdrop-filter:blur(16px);
-            color:#fff;
-        }
-
-        .xp-top {
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:15px;
-            margin-bottom:8px;
-        }
-
-        .xp-label {
-            font-size:10px;
-            font-weight:900;
-            letter-spacing:1.4px;
-            text-transform:uppercase;
-            color:rgba(255,255,255,.62);
-        }
-
-        .xp-value {
-            color:var(--yellow);
-            font-weight:900;
-            font-size:13px;
-        }
-
-        .xp-track {
-            height:6px;
-            border-radius:20px;
-            background:rgba(255,255,255,.12);
-            overflow:hidden;
-        }
-
-        .xp-fill {
-            height:100%;
-            width:12%;
-            border-radius:20px;
-            background:linear-gradient(90deg,var(--blue),var(--blue2));
-            transition:width .7s ease;
-        }
-
-        .stage {
-            display:grid;
-            grid-template-columns:minmax(0,1fr) 390px;
-            gap:24px;
-            min-height:610px;
-        }
-
-        .content-card {
-            align-self:center;
-            padding:38px;
-            border:1px solid rgba(255,255,255,.17);
-            border-radius:30px;
-            background:rgba(255,255,255,.94);
-            box-shadow:0 24px 70px rgba(0,0,0,.25);
-        }
-
-        .eyebrow {
-            display:inline-flex;
-            align-items:center;
-            gap:8px;
-            padding:7px 11px;
-            border-radius:999px;
-            background:#eaf2ff;
-            color:var(--blue);
-            font-size:10px;
-            font-weight:900;
-            letter-spacing:1.1px;
-            text-transform:uppercase;
-        }
-
-        .eyebrow i { font-size:13px; }
-
-        h1 {
-            margin:18px 0 12px;
-            color:var(--navy);
-            font-size:clamp(28px,4vw,52px);
-            line-height:1.08;
-            letter-spacing:-1.8px;
-            font-weight:950;
-            max-width:780px;
-        }
-
-        .lead {
-            margin:0;
-            max-width:800px;
-            color:#53647d;
-            font-size:clamp(14px,1.6vw,16px);
-            line-height:1.7;
-        }
-
-        .effects {
-            display:grid;
-            grid-template-columns:repeat(2,minmax(0,1fr));
-            gap:13px;
-            margin-top:26px;
-        }
-
-        .effect-card {
-            position:relative;
-            min-height:155px;
-            padding:20px;
-            border:1px solid #e2eaf5;
-            border-radius:21px;
-            background:#fff;
-            cursor:pointer;
-            text-align:left;
-            transition:.22s ease;
-        }
-
-        .effect-card:hover {
-            transform:translateY(-3px);
-            border-color:#9dc1ff;
-            box-shadow:0 14px 30px rgba(23,105,255,.10);
-        }
-
-        .effect-card.active {
-            border-color:var(--blue);
-            box-shadow:0 0 0 3px rgba(23,105,255,.10);
-            background:#f8fbff;
-        }
-
-        .effect-icon {
-            width:42px;
-            height:42px;
-            display:grid;
-            place-items:center;
-            border-radius:13px;
-            background:#edf4ff;
-            color:var(--blue);
-            font-size:19px;
-            margin-bottom:13px;
-        }
-
-        .effect-card h3 {
-            margin:0 0 7px;
-            font-size:15px;
-            font-weight:950;
-            color:var(--navy);
-        }
-
-        .effect-card p {
-            margin:0;
-            font-size:12px;
-            line-height:1.55;
-            color:#65758c;
-        }
-
-        .selected {
-            margin-top:16px;
-            padding:16px 18px;
-            border-radius:18px;
-            background:#eef6ff;
-            border:1px solid #d8e9ff;
-        }
-
-        .selected-label {
-            font-size:9px;
-            font-weight:950;
-            letter-spacing:1.2px;
-            text-transform:uppercase;
-            color:var(--blue);
-            margin-bottom:5px;
-        }
-
-        .selected-title {
-            font-size:15px;
-            font-weight:950;
-            color:var(--navy);
-        }
-
-        .selected-text {
-            margin-top:4px;
-            font-size:12px;
-            line-height:1.55;
-            color:#5d6d83;
-        }
-
-        .actions {
-            display:flex;
-            justify-content:flex-end;
-            align-items:center;
-            gap:10px;
-            margin-top:22px;
-        }
-
-        .btn-action {
-            border:0;
-            border-radius:14px;
-            min-height:46px;
-            padding:0 17px;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            font-size:12px;
-            font-weight:900;
-            cursor:pointer;
-            transition:.2s ease;
-        }
-
-        .btn-voice {
-            background:#edf4ff;
-            color:var(--blue);
-        }
-
-        .btn-voice:hover { background:#dceaff; }
-
-        .btn-next {
-            background:var(--blue);
-            color:#fff;
-            box-shadow:0 10px 22px rgba(23,105,255,.25);
-        }
-
-        .btn-next:hover {
-            transform:translateY(-2px);
-            background:#0e5ce8;
-        }
-
-        .avatar-side {
-            position:relative;
-            min-height:610px;
-            display:flex;
-            align-items:flex-end;
-            justify-content:center;
-        }
-
-        .avatar-glow {
-            position:absolute;
-            width:330px;
-            height:330px;
-            border-radius:50%;
-            background:rgba(88,198,255,.18);
-            filter:blur(30px);
-            bottom:55px;
-        }
-
-        .avatar {
-            position:relative;
-            z-index:2;
-            width:min(100%,390px);
-            max-height:610px;
-            object-fit:contain;
-            object-position:center bottom;
-            filter:drop-shadow(0 24px 24px rgba(0,0,0,.22));
-            animation:float 4.8s ease-in-out infinite;
-        }
-
-        .speech {
-            position:absolute;
-            z-index:4;
-            top:58px;
-            left:0;
-            right:0;
-            margin:auto;
-            width:min(350px,92%);
-            padding:17px 18px;
-            border-radius:20px;
-            background:rgba(255,255,255,.96);
-            box-shadow:0 18px 45px rgba(0,0,0,.18);
-            border:1px solid rgba(255,255,255,.8);
-        }
-
-        .speech::after {
-            content:"";
-            position:absolute;
-            bottom:-10px;
-            left:45%;
-            width:20px;
-            height:20px;
-            background:#fff;
-            transform:rotate(45deg);
-        }
-
-        .speech-top {
-            display:flex;
-            align-items:center;
-            gap:8px;
-            margin-bottom:7px;
-        }
-
-        .speech-dot {
-            width:8px;
-            height:8px;
-            border-radius:50%;
-            background:var(--blue);
-            flex-shrink:0;
-        }
-
-        .speech-name {
-            font-size:10px;
-            font-weight:950;
-            color:var(--blue);
-            letter-spacing:.8px;
-            text-transform:uppercase;
-        }
-
-        .speech p {
-            position:relative;
-            z-index:2;
-            margin:0;
-            color:#263b5a;
-            font-size:13px;
-            line-height:1.55;
-            font-weight:650;
-        }
-
-        .progress-area {
-            margin-top:19px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:8px;
-            color:rgba(255,255,255,.60);
-            font-size:9px;
-            font-weight:900;
-            text-transform:uppercase;
-            letter-spacing:.55px;
-        }
-
-        .progress-step {
-            display:flex;
-            align-items:center;
-            gap:6px;
-            white-space:nowrap;
-        }
-
-        .progress-dot {
-            width:8px;
-            height:8px;
-            border-radius:50%;
-            background:rgba(255,255,255,.22);
-            flex-shrink:0;
-        }
-
-        .progress-step.done .progress-dot,
-        .progress-step.active .progress-dot {
-            background:var(--yellow);
-            box-shadow:0 0 0 4px rgba(255,212,71,.12);
-        }
-
-        .progress-step.active { color:#fff; }
-
-        .progress-connector {
-            width:25px;
-            height:1px;
-            background:rgba(255,255,255,.17);
-            flex-shrink:0;
-        }
-
-        .toast-complete {
-            position:fixed;
-            inset:0;
-            z-index:50;
-            display:none;
-            align-items:center;
-            justify-content:center;
-            padding:20px;
-            background:rgba(2,10,24,.68);
-            backdrop-filter:blur(9px);
-        }
-
-        .toast-complete.show { display:flex; }
-
-        .complete-box {
-            width:min(430px,100%);
-            padding:30px;
-            border-radius:28px;
-            background:#fff;
-            text-align:center;
-            box-shadow:0 30px 90px rgba(0,0,0,.35);
-            animation:pop .35s ease;
-        }
-
-        .complete-icon {
-            width:62px;
-            height:62px;
-            margin:0 auto 15px;
-            border-radius:20px;
-            display:grid;
-            place-items:center;
-            background:#eaf3ff;
-            color:var(--blue);
-            font-size:27px;
-        }
-
-        .complete-box h2 {
-            margin:0;
-            color:var(--navy);
-            font-size:24px;
-            font-weight:950;
-        }
-
-        .complete-box p {
-            margin:8px 0 20px;
-            color:var(--muted);
-            font-size:13px;
-        }
-
-        .xp-earned {
-            display:inline-flex;
-            align-items:center;
-            gap:7px;
-            padding:9px 14px;
-            border-radius:999px;
-            background:#fff5c9;
-            color:#6e5600;
-            font-size:12px;
-            font-weight:950;
-            margin-bottom:20px;
-        }
-
-        @keyframes float {
-            0%,100% { transform:translateY(0); }
-            50% { transform:translateY(-9px); }
-        }
-
-        @keyframes pop {
-            from { transform:scale(.94); opacity:0; }
-            to { transform:scale(1); opacity:1; }
-        }
-
-        /* ============================================
-           RESPONSIVE — tablet / mobile (<=1050px)
-           ============================================ */
-        @media (max-width:1050px) {
-
-            .stage {
-                grid-template-columns:1fr;
-                min-height:auto;
-                gap:28px;
-            }
-
-            /* El avatar y su globo/burbuja dejan de flotar superpuestos
-               y pasan a apilarse en flujo normal: evita que la burbuja
-               (con texto largo) se monte encima de la tarjeta de abajo. */
-            .avatar-side {
-                min-height:auto;
-                order:-1;
-                flex-direction:column;
-                align-items:center;
-                justify-content:center;
-                gap:16px;
-                padding-top:6px;
-            }
-
-            .avatar-glow { display:none; }
-
-            .avatar {
-                position:relative;
-                width:min(60vw,300px);
-                max-height:360px;
-                animation:none;
-            }
-
-            .speech {
-                position:relative;
-                z-index:2;
-                top:auto;
-                left:auto;
-                right:auto;
-                margin:0 auto;
-                width:min(420px,94%);
-            }
-
-            .speech::after { display:none; }
-
-            .content-card { align-self:auto; }
-        }
-
-        /* ============================================
-           RESPONSIVE — móvil (<=720px)
-           ============================================ */
-        @media (max-width:720px) {
-            .page { padding:15px 14px 25px; }
-
-            .brand-subtitle { display:none; }
-
-            .counter { padding:9px 11px; }
-
-            .stage { gap:18px; }
-
-            .avatar-side { gap:12px; }
-
-            .avatar {
-                width:min(52vw,240px);
-                max-height:280px;
-            }
-
-            .speech {
-                width:100%;
-                padding:15px 16px;
-            }
-
-            .content-card {
-                padding:24px 18px;
-                border-radius:23px;
-            }
-
-            h1 { font-size:32px; }
-
-            .lead { font-size:14px; }
-
-            .effects {
-                grid-template-columns:1fr;
-            }
-
-            .effect-card { min-height:auto; }
-
-            .actions {
-                flex-direction:column;
-                align-items:stretch;
-            }
-
-            .btn-action { width:100%; }
-
-            .progress-area {
-                overflow-x:auto;
-                justify-content:flex-start;
-                padding-bottom:5px;
-                -webkit-overflow-scrolling:touch;
-            }
-
-            .progress-connector { width:15px; }
-        }
-
-        /* ============================================
-           RESPONSIVE — móviles muy pequeños (<=420px)
-           ============================================ */
-        @media (max-width:420px) {
-            .brand-title { font-size:17px; }
-
-            .counter {
-                font-size:9px;
-                padding:8px 9px;
-                gap:5px;
-            }
-
-            .avatar { width:min(48vw,190px); max-height:220px; }
-
-            h1 { font-size:26px; letter-spacing:-1px; }
-
-            .effect-card { padding:16px; }
-
-            .effect-icon { width:36px; height:36px; font-size:16px; }
-
-            .complete-box { padding:22px; }
-        }
+        :root{
+            --navy:#152d4f; --blue:#2469b3; --blue-soft:#eaf2fc;
+            --green:#1f7a55; --green-soft:#e6f4ec;
+            --gold:#e9b530; --gold-soft:#fdf3d3; --gold-ink:#7a5a05;
+            --red:#b3272f; --red-soft:#fde8e8;
+            --amber:#a56a00; --amber-soft:#fff1cf;
+            --ink:#1d2b40; --muted:#5f6d80; --paper:#fbf8f2; --card:#ffffff; --line:#e7e1d4;
+            --r:16px; --blue-deep:#17457c;
+            --font-title:"Nunito","Poppins",system-ui,sans-serif;
+            --font-body:"Inter","Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+        }
+        *,*::before,*::after{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+        img{max-width:100%;display:block}
+        :focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+        /* ---------- NAV CON PROGRESO ---------- */
+        .nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);border-bottom:1px solid var(--line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+        .nav-inner{max-width:1080px;margin:0 auto;padding:12px 24px 10px}
+        .nav-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+        .brand{display:flex;align-items:center;gap:12px;min-width:0}
+        .back{flex:0 0 auto;width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);font-size:18px;text-decoration:none;transition:background .2s}
+        .back:hover{background:var(--blue-soft)}
+        .brand-title{font-family:var(--font-title);font-size:21px;font-weight:800;line-height:1.1;color:var(--blue-deep)}
+        .brand-sub{font-size:14px;color:var(--muted)}
+        .scene-count{flex:0 0 auto;text-align:right;line-height:1.2}
+        .scene-count strong{display:block;font-size:16px;color:var(--navy)}
+        .scene-count span{font-size:14px;color:var(--muted)}
+
+        .progress{padding:18px 0 0}
+        .track-area{position:relative;margin:0 44px}
+        .track{position:relative;height:8px;border-radius:99px;background:#e9e4d8}
+        .fill{height:100%;width:{{ $porcentajeRecorrido }}%;border-radius:inherit;background:linear-gradient(90deg,var(--blue),var(--gold));transition:width .6s ease}
+        .stops{position:absolute;inset:0}
+        .stop{position:absolute;top:50%;width:16px;height:16px;transform:translate(-50%,-50%);border-radius:50%;background:#fff;border:3px solid #cfc8b8}
+        .stop.done{border-color:var(--gold);background:var(--gold)}
+        .stop.current{border-color:var(--blue)}
+        .marker{position:absolute;z-index:2;top:50%;left:{{ $porcentajeRecorrido }}%;width:36px;height:36px;transform:translate(-50%,-50%);border:3px solid #fff;border-radius:50%;background:var(--blue-soft);box-shadow:0 0 0 3px rgba(36,105,179,.35),0 4px 10px rgba(21,45,79,.28);overflow:hidden;transition:left .6s ease}
+        .marker img{width:100%;height:100%;object-fit:cover;object-position:center top}
+        .labels{position:relative;height:24px;margin-top:16px}
+        .labels span{position:absolute;top:0;transform:translateX(-50%);text-align:center;font-size:14px;color:#8a8577;font-weight:700;white-space:nowrap}
+        .labels .done{color:var(--gold-ink)}
+        .labels .current{color:var(--blue)}
+
+        /* ---------- PÁGINA ---------- */
+        .page{max-width:1080px;margin:0 auto;padding:36px 24px 64px}
+        .tag{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:99px;background:var(--green-soft);color:var(--green);font-size:14px;font-weight:700}
+        h1{max-width:860px;margin:16px 0 14px;font-family:var(--font-title);font-size:clamp(34px,5.4vw,54px);font-weight:900;line-height:1.1;letter-spacing:-.02em;color:var(--blue-deep)}
+        .lead{max-width:740px;margin:0 0 32px;font-size:clamp(18px,2.2vw,21px);font-weight:500;line-height:1.6;color:#48576b}
+
+        .section-title{display:flex;align-items:center;gap:10px;margin:0 0 8px;font-family:var(--font-title);font-size:clamp(25px,3.4vw,32px);font-weight:800;line-height:1.2;letter-spacing:-.01em;color:var(--green)}
+        .section-title i{color:var(--blue);font-size:.85em}
+        #quiz-title{color:var(--blue-deep)}
+        .section-sub{margin:0 0 18px;color:#48576b;font-size:18px;font-weight:500}
+        section+section,.block{margin-top:36px}
+
+        /* Factores */
+        .factors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:0;padding:0;list-style:none}
+        .factor{padding:20px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);box-shadow:0 4px 16px rgba(60,45,10,.05)}
+        .factor-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+        .factor-icon{width:54px;height:54px;display:grid;place-items:center;border-radius:15px;font-size:26px;background:var(--blue-soft);color:var(--blue)}
+        .factor:nth-child(3n+2) .factor-icon{background:var(--gold-soft);color:var(--amber)}
+        .factor:nth-child(3n) .factor-icon{background:var(--green-soft);color:var(--green)}
+        .factor-data{padding:4px 13px;border-radius:99px;background:var(--gold-soft);color:#634700;font-family:var(--font-title);font-size:19px;font-weight:900}
+        .factor h3{margin:0 0 6px;font-family:var(--font-title);font-size:21px;font-weight:800;line-height:1.25;color:var(--blue-deep)}
+        .factor p{margin:0;font-size:16px;line-height:1.55;color:#48576b}
+
+        /* Escenario */
+        .scenario{overflow:hidden;border:1px solid var(--line);border-radius:var(--r);background:var(--card);box-shadow:0 6px 20px rgba(60,45,10,.06)}
+        .scenario-head{display:flex;align-items:center;gap:16px;padding:22px 26px;background:linear-gradient(135deg,var(--blue-deep),#2f61b3);color:#fff}
+        .scenario-head>i{flex:0 0 auto;font-size:34px;color:var(--gold)}
+        .scenario-head small{display:block;font-size:15px;font-weight:700;color:#cfe0f5}
+        .scenario-head p{margin:2px 0 0;font-family:var(--font-title);font-size:clamp(21px,3.2vw,28px);font-weight:800;line-height:1.3;color:#fff}
+        .replies{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px}
+        .reply{padding:20px;border:2px solid;border-radius:14px}
+        .reply.no{background:var(--red-soft);border-color:#f2c1c1}
+        .reply.yes{background:var(--green-soft);border-color:#b7e0c8}
+        .reply h4{display:flex;align-items:center;gap:9px;margin:0 0 10px;font-family:var(--font-title);font-size:20px;font-weight:800}
+        .reply.no h4{color:var(--red)}
+        .reply.yes h4{color:var(--green)}
+        .reply blockquote{margin:0;font-size:17px;line-height:1.6;color:var(--ink)}
+
+        .note{display:flex;gap:16px;margin-top:18px;padding:18px 22px;border:1px solid #f0d99a;border-radius:var(--r);background:var(--gold-soft)}
+        .note>i{font-size:24px;color:var(--amber);line-height:1.3}
+        .note h3{margin:0 0 4px;font-family:var(--font-title);font-size:20px;font-weight:800;color:var(--blue-deep)}
+        .note p{margin:0;font-size:17px;color:#5b5238}
+
+        /* ---------- CUESTIONARIO ---------- */
+        .quiz-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+        .xp{display:flex;align-items:center;gap:12px;padding:10px 18px;border:1px solid #f0d99a;border-radius:14px;background:var(--gold-soft)}
+        .xp i{font-size:24px;color:var(--amber)}
+        .xp strong{display:block;font-size:20px;line-height:1.1;color:#634700}
+        .xp small{font-size:13px;color:#7d6a35}
+
+        .quiz{display:grid;grid-template-columns:250px minmax(0,1fr);gap:22px;align-items:start}
+        .coach{position:sticky;top:150px;padding:22px 18px;text-align:center;border:1px solid var(--line);border-radius:var(--r);background:var(--card);box-shadow:0 6px 20px rgba(60,45,10,.06)}
+        .coach-img{width:100%;max-width:190px;aspect-ratio:3/4;margin:0 auto 14px;display:flex;align-items:flex-end;justify-content:center;border-radius:20px 20px 12px 12px;background:linear-gradient(170deg,#e4efff,#fdf3d3);overflow:hidden}
+        .coach-img img{width:100%;height:100%;object-fit:contain;object-position:center bottom}
+        .coach h3{margin:0;font-family:var(--font-title);font-size:23px;font-weight:800;color:var(--blue-deep)}
+        .coach small{display:block;margin:2px 0 10px;font-size:14px;color:var(--muted)}
+        .coach p{margin:0;font-size:15px;line-height:1.5;color:var(--muted)}
+        .quiz-meter{margin-top:16px;text-align:left;font-size:14px;color:var(--muted)}
+        .quiz-meter div{display:flex;justify-content:space-between;margin-bottom:6px}
+        .quiz-meter strong{color:var(--navy)}
+        .meter-track{height:8px;border-radius:99px;background:#e9e4d8;overflow:hidden}
+        .meter-fill{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--blue),var(--green));transition:width .35s}
+
+        .questions{display:grid;gap:16px;min-width:0}
+        .q{padding:24px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);box-shadow:0 4px 16px rgba(60,45,10,.05)}
+        .q-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+        .q-num{font-size:15px;font-weight:700;color:var(--blue)}
+        .q-xp{font-size:14px;font-weight:700;color:var(--amber);background:var(--gold-soft);padding:3px 10px;border-radius:99px}
+        .q h3{margin:0 0 16px;font-family:var(--font-title);font-size:21px;font-weight:800;line-height:1.4;color:var(--blue-deep)}
+        .answers{display:grid;gap:10px}
+        .answer{display:flex;align-items:flex-start;gap:14px;width:100%;padding:14px 16px;text-align:left;border:2px solid #e4dfd2;border-radius:12px;background:#fff;color:var(--ink);font:inherit;font-size:17px;line-height:1.45;cursor:pointer;transition:border-color .18s,background .18s}
+        .answer .letter{flex:0 0 30px;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#f1ede2;color:var(--navy);font-size:15px;font-weight:700}
+        .answer:hover:not(:disabled){border-color:var(--blue);background:#f6faff}
+        .answer:disabled{cursor:default}
+        .answer.correct{border-color:#3aa574;background:#f0faf4}
+        .answer.correct .letter{background:#3aa574;color:#fff}
+        .answer.incorrect{border-color:#e0563c;background:#fff5f3}
+        .answer.incorrect .letter{background:#e0563c;color:#fff}
+        .feedback{display:flex;gap:10px;margin-top:14px;padding:14px 16px;border-radius:12px;font-size:16px;line-height:1.5}
+        .feedback.good{background:var(--green-soft);color:#155c3f}
+        .feedback.bad{background:var(--red-soft);color:#8f1f26}
+        .feedback[hidden]{display:none}
+
+        .finish{display:flex;align-items:center;gap:14px;padding:18px 20px;border:1px solid #b9e2cb;border-radius:var(--r);background:var(--green-soft)}
+        .finish[hidden]{display:none}
+        .finish>i{font-size:30px;color:var(--green)}
+        .finish strong{display:block;font-family:var(--font-title);font-size:19px;font-weight:800;color:#155c3f}
+        .finish p{margin:2px 0 0;font-size:16px;color:#3f7659}
+
+        /* ---------- ACCIONES ---------- */
+        .actions{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-top:40px;padding-top:24px;border-top:1px solid var(--line)}
+        .hint{flex-basis:100%;margin:0;font-size:15px;color:var(--red)}
+        .hint[hidden]{display:none}
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:50px;padding:12px 22px;border:2px solid #d9d3c4;border-radius:12px;background:#fff;color:var(--navy);font:inherit;font-size:16px;font-weight:700;text-decoration:none;cursor:pointer;transition:transform .2s,box-shadow .2s}
+        .btn:hover{transform:translateY(-1px)}
+        .btn-primary{border-color:var(--gold);background:var(--gold);box-shadow:0 8px 18px rgba(200,150,20,.25)}
+        .btn:disabled{opacity:.75;cursor:default;transform:none}
+
+        .locked-note{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border:1px solid #f0d99a;border-radius:12px;background:var(--gold-soft);color:#5b5238;font-size:16px;line-height:1.5}
+        .locked-note[hidden]{display:none}
+        .locked-note i{margin-top:2px;font-size:18px;color:var(--amber)}
+        .answer:disabled:not(.correct):not(.incorrect){opacity:.7}
+
+        /* ---------- RECOMPENSAS: MEDALLA Y RESULTADO ---------- */
+        .rewards{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+        .medal-chip{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border:1px solid #f0d99a;border-radius:14px;background:#fff;color:#634700;font:inherit;font-size:15px;font-weight:700;cursor:pointer;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+        .medal-chip img{width:34px;height:34px;object-fit:contain}
+        .medal-chip[hidden]{display:none}
+        .modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:rgba(15,32,58,.62);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+        .modal[hidden]{display:none}
+        .modal-card{position:relative;z-index:2;width:min(460px,100%);max-height:calc(100vh - 40px);overflow:auto;padding:28px 24px 24px;text-align:center;border-radius:24px;background:#fff;box-shadow:0 30px 70px rgba(10,25,50,.4);animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+        .medal-stage{width:176px;height:176px;margin:0 auto 4px}
+        .medal{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(160,110,10,.3));transform-origin:50% 60%;animation:swing 1.6s ease-out .25s both}
+        .almost{width:104px;height:104px;margin:14px auto 18px;display:grid;place-items:center;border-radius:50%;background:var(--blue-soft);color:var(--blue);font-size:46px}
+        .medal[hidden],.almost[hidden]{display:none}
+        .modal-card h2{margin:4px 0 8px;font-family:var(--font-title);font-size:clamp(26px,6vw,32px);font-weight:900;line-height:1.15;color:var(--blue-deep)}
+        .modal-card p{margin:0 auto 18px;max-width:36ch;font-size:17px;color:#48576b}
+        .modal-stats{display:flex;justify-content:center;gap:12px;margin-bottom:22px}
+        .modal-stats div{flex:1;max-width:150px;padding:10px;border-radius:14px;background:var(--gold-soft)}
+        .modal-stats strong{display:block;font-family:var(--font-title);font-size:28px;font-weight:900;line-height:1.1;color:#634700}
+        .modal-stats span{font-size:14px;color:#7d6a35}
+        .modal-actions{display:grid;gap:10px}
+        .confetti{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+        .confetti i{position:absolute;top:-20px;width:10px;height:16px;border-radius:2px;animation:fall linear forwards}
+        @keyframes pop{from{opacity:0;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
+        @keyframes swing{0%{transform:rotate(-16deg) scale(.5);opacity:0}40%{transform:rotate(9deg) scale(1.06);opacity:1}70%{transform:rotate(-4deg)}100%{transform:rotate(0)}}
+        @keyframes fall{to{transform:translate3d(var(--dx),110vh,0) rotate(var(--rot))}}
+
+        /* ---------- RESPONSIVE ---------- */
+        @media(max-width:860px){
+            .factors{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .quiz{grid-template-columns:1fr}
+            .coach{position:static;display:grid;grid-template-columns:110px 1fr;column-gap:16px;align-items:center;text-align:left;padding:16px}
+            .coach-img{grid-row:1 / span 3;max-width:none;margin:0}
+            .quiz-meter{grid-column:1 / -1}
+        }
+        @media(max-width:640px){
+            body{font-size:16px}
+            .nav-inner{padding:10px 14px 8px}
+            .brand-sub{display:none}
+            .brand-title{font-size:18px}
+            .progress{padding:16px 0 0}
+            .track-area{margin:0 36px}
+            .marker{width:32px;height:32px}
+            .labels{margin-top:14px}
+            .labels span{font-size:13px}
+            .page{padding:26px 16px 48px}
+            .lead{font-size:17px}
+            .factors{grid-template-columns:1fr}
+            .replies{grid-template-columns:1fr;padding:14px}
+            .scenario-head{padding:18px}
+            .q{padding:18px 16px}
+            .q h3{font-size:20px}
+            .section-sub{font-size:17px}
+            .hint,.quiz-meter,.coach p,.coach small,.feedback,.finish p,.note p,.factor p,.reply blockquote,.xp small,.q-num,.tag{font-size:16px}
+            .answer{font-size:16px;padding:12px}
+            .coach{grid-template-columns:90px 1fr}
+            .actions{flex-direction:column-reverse;align-items:stretch}
+            .btn{width:100%}
+        }
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
     </style>
 </head>
-
 <body>
 
-<div class="learn">
-
-    <div class="background"></div>
-
-    <div class="page">
-
-        <header class="topbar">
+{{-- ============ NAV + PROGRESO ============ --}}
+<header class="nav">
+    <div class="nav-inner">
+        <div class="nav-row">
             <div class="brand">
-                <a
-                    href="{{ url('/escena') }}"
-                    class="back"
-                    aria-label="Volver a la escena 1"
-                    title="Volver a la escena 1">
-                    <i class="bi bi-arrow-left"></i>
-                </a>
-
+                <a href="{{ url('/aprende') }}" class="back" aria-label="Volver a Aprende"><i class="bi bi-arrow-left"></i></a>
                 <div>
                     <div class="brand-title">Aprende</div>
-                    <div class="brand-subtitle">Comprender también es prevenir</div>
+                    <div class="brand-sub">Comprender también es prevenir</div>
                 </div>
             </div>
-
-            <div class="counter">
-                <span>ESCENA</span>
-                <strong>02</strong>
-                <span>/</span>
-                <span>08</span>
-            </div>
-        </header>
-
-        <div class="xp-panel">
-            <div class="xp-top">
-                <span class="xp-label">Tu recorrido de aprendizaje</span>
-                <span class="xp-value"><span id="xpValue">50</span> XP</span>
-            </div>
-
-            <div class="xp-track">
-                <div class="xp-fill" id="xpFill"></div>
+            <div class="scene-count">
+                <strong>Nivel {{ $escenaActual }} de {{ $totalEscenas }}</strong>
+                <span>{{ $etapas[$escenaActual - 1] ?? '' }}</span>
             </div>
         </div>
 
-        <main class="stage">
-
-            <section class="content-card">
-
-                <span class="eyebrow">
-                    <i class="bi bi-lightbulb"></i>
-                    Escena 02 · Comprender
-                </span>
-
-                <h1>¿Qué efectos negativos puede traer el alcohol?</h1>
-
-                <p class="lead">
-                    En los menores, el alcohol puede afectar distintas áreas de la vida.
-                    No se trata solamente de sentirse mal después de beber. También puede
-                    influir en el cerebro, las decisiones, las relaciones y la seguridad.
-                </p>
-
-                <div class="effects">
-
-                    <button class="effect-card active" type="button"
-                        data-title="Cerebro y aprendizaje"
-                        data-text="Durante la adolescencia el cerebro todavía está en desarrollo. El alcohol puede interferir con procesos relacionados con la memoria, el aprendizaje y la toma de decisiones."
-                        onclick="seleccionarEfecto(this)">
-                        <div class="effect-icon">
-                            <i class="bi bi-cpu"></i>
-                        </div>
-                        <h3>Cerebro y aprendizaje</h3>
-                        <p>Puede afectar procesos relacionados con la memoria, el aprendizaje y las decisiones.</p>
-                    </button>
-
-                    <button class="effect-card" type="button"
-                        data-title="Emociones y decisiones"
-                        data-text="El alcohol puede afectar el juicio y el control de los impulsos, haciendo más difícil valorar los riesgos y tomar decisiones seguras."
-                        onclick="seleccionarEfecto(this)">
-                        <div class="effect-icon">
-                            <i class="bi bi-signpost-split"></i>
-                        </div>
-                        <h3>Emociones y decisiones</h3>
-                        <p>Puede alterar el juicio y hacer más difícil valorar los riesgos.</p>
-                    </button>
-
-                    <button class="effect-card" type="button"
-                        data-title="Cuerpo y seguridad"
-                        data-text="El alcohol puede aumentar el riesgo de caídas, lesiones, accidentes y otras situaciones peligrosas, especialmente cuando se consume en exceso."
-                        onclick="seleccionarEfecto(this)">
-                        <div class="effect-icon">
-                            <i class="bi bi-shield-exclamation"></i>
-                        </div>
-                        <h3>Cuerpo y seguridad</h3>
-                        <p>Puede aumentar el riesgo de lesiones, accidentes y situaciones peligrosas.</p>
-                    </button>
-
-                    <button class="effect-card" type="button"
-                        data-title="Relaciones y estudio"
-                        data-text="El consumo de alcohol puede relacionarse con dificultades en la escuela, conflictos y problemas en las relaciones con otras personas."
-                        onclick="seleccionarEfecto(this)">
-                        <div class="effect-icon">
-                            <i class="bi bi-people"></i>
-                        </div>
-                        <h3>Relaciones y estudio</h3>
-                        <p>Puede relacionarse con dificultades escolares, conflictos y problemas en las relaciones.</p>
-                    </button>
-
-                </div>
-
-                <div class="selected">
-                    <div class="selected-label">Profundiza</div>
-                    <div class="selected-title" id="selectedTitle">Cerebro y aprendizaje</div>
-                    <div class="selected-text" id="selectedText">
-                        Durante la adolescencia el cerebro todavía está en desarrollo.
-                        El alcohol puede interferir con procesos relacionados con la memoria,
-                        el aprendizaje y la toma de decisiones.
+        <div class="progress" role="progressbar" aria-label="Progreso del recorrido"
+             aria-valuemin="1" aria-valuemax="{{ $totalEscenas }}" aria-valuenow="{{ $escenaActual }}"
+             aria-valuetext="Nivel {{ $escenaActual }} de {{ $totalEscenas }}: {{ $etapas[$escenaActual - 1] ?? '' }}">
+            <div class="track-area">
+                <div class="track">
+                    <div class="fill"></div>
+                    <div class="stops">
+                    @for($i = 1; $i <= $totalEscenas; $i++)
+                        <span class="stop {{ $i < $escenaActual ? 'done' : '' }} {{ $i === $escenaActual ? 'current' : '' }}" style="left:{{ $posicion($i) }}%"></span>
+                    @endfor
+                    </div>
+                    <div class="marker" title="{{ $avatarNombre }}">
+                        <img src="{{ $avatarRuta }}" alt="{{ $avatarNombre }} en el recorrido" onerror="this.onerror=null;this.src='{{ $avatarFallback }}'">
                     </div>
                 </div>
-
-                <div class="actions">
-                    <button class="btn-action btn-voice" type="button" onclick="escuchar()">
-                        <i class="bi bi-volume-up"></i>
-                        Escuchar a Alex
-                    </button>
-
-                    <button class="btn-action btn-next" type="button" onclick="completarEscena()">
-                        Continuar
-                        <i class="bi bi-arrow-right"></i>
-                    </button>
+                <div class="labels">
+                    @foreach($etapas as $index => $label)
+                        <span class="{{ ($index + 1) < $escenaActual ? 'done' : '' }} {{ ($index + 1) === $escenaActual ? 'current' : '' }}" style="left:{{ $posicion($index + 1) }}%">{{ $label }}</span>
+                    @endforeach
                 </div>
+            </div>
+        </div>
+    </div>
+</header>
 
-            </section>
+<main class="page">
 
-            <aside class="avatar-side">
+    {{-- ============ ENCABEZADO ============ --}}
+    <div class="tag"><i class="bi bi-lightbulb"></i> Nivel 2 · Entender por qué</div>
+    <h1>¿Por qué consumen los adolescentes?</h1>
+    <p class="lead">El consumo adolescente casi nunca es capricho — es una respuesta a algo. Reconocer las causas cambia completamente cómo intervenir.</p>
 
-                <div class="avatar-glow"></div>
+    {{-- ============ FACTORES ============ --}}
+    <section aria-labelledby="factores-title">
+        <h2 class="section-title" id="factores-title"><i class="bi bi-diagram-3"></i> Seis factores que influyen</h2>
+        <p class="section-sub">Conocerlos ayuda a intervenir mejor.</p>
 
-                <div class="speech">
-                    <div class="speech-top">
-                        <span class="speech-dot"></span>
-                        <span class="speech-name">Profesor Alex</span>
+        <ul class="factors">
+            @foreach($factores as [$icono, $titulo, $texto, $dato])
+                <li class="factor">
+                    <div class="factor-top">
+                        <span class="factor-icon"><i class="bi {{ $icono }}"></i></span>
+                        @if($dato)
+                            <span class="factor-data">{{ $dato }}</span>
+                        @endif
                     </div>
+                    <h3>{{ $titulo }}</h3>
+                    <p>{{ $texto }}</p>
+                </li>
+            @endforeach
+        </ul>
 
-                    <p id="speechText">
-                        No todo se reduce a “tomar o no tomar”.
-                        También importa entender qué puede cambiar cuando el alcohol
-                        entra en la vida de un menor.
-                    </p>
+        <aside class="note">
+            <i class="bi bi-geo-alt-fill"></i>
+            <div>
+                <h3>Factores específicos en Colombia</h3>
+                <p>La normalización del “rumbeadero” desde joven, el fácil acceso en zonas urbanas y la presión de pertenecer hacen que el entorno importe tanto o más que el individuo.</p>
+            </div>
+        </aside>
+    </section>
+
+    {{-- ============ ESCENARIO ============ --}}
+    <section aria-labelledby="escenario-title">
+        <h2 class="section-title" id="escenario-title"><i class="bi bi-chat-dots"></i> Escenario: la pregunta que incomoda</h2>
+        <p class="section-sub">Compare dos formas de responder.</p>
+
+        <div class="scenario">
+            <div class="scenario-head">
+                <i class="bi bi-chat-quote-fill"></i>
+                <div>
+                    <small>Hijo/a pregunta:</small>
+                    <p>“{{ $preguntaHijo }}”</p>
                 </div>
+            </div>
+            <div class="replies">
+                <div class="reply no">
+                    <h4><i class="bi bi-x-circle-fill"></i> Cierra la conversación</h4>
+                    <blockquote>“{{ $respuestaCierra }}”</blockquote>
+                </div>
+                <div class="reply yes">
+                    <h4><i class="bi bi-check-circle-fill"></i> Abre la conexión</h4>
+                    <blockquote>“{{ $respuestaAbre }}”</blockquote>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                <img
-                    class="avatar"
-                    src="{{ asset('build/avatars/cuerpo2.webp') }}"
-                    alt="Profesor Alex">
+    {{-- ============ CUESTIONARIO ============ --}}
+    <section aria-labelledby="quiz-title">
+        <div class="quiz-head">
+            <div>
+                <div class="tag"><i class="bi bi-controller"></i> Actividad interactiva</div>
+                <h2 class="section-title" id="quiz-title" style="margin-top:12px">Quiz del nivel 2</h2>
+                <p class="section-sub" style="margin:0">Elija con calma: cada pregunta se responde una sola vez. Solo los aciertos suman XP; si acierta todas, gana un bono.</p>
+            </div>
+            <div class="rewards">
+                <div class="xp" aria-live="polite">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <div><strong><span id="xpTotal">0</span> XP</strong><small>Experiencia ganada</small></div>
+                </div>
+                <button type="button" class="medal-chip" id="medalChip" hidden>
+                    <img src="{{ $medallaImagen }}" alt="" onerror="this.hidden=true"> {{ $nombreMedalla }}
+                </button>
+            </div>
+        </div>
+
+        <div class="quiz">
+            <aside class="coach">
+                <div class="coach-img">
+                    <img src="{{ $avatarRuta }}" alt="{{ $avatarNombre }}, tu compañero" onerror="this.onerror=null;this.src='{{ $avatarFallback }}'">
+                </div>
+                <h3>{{ $avatarNombre }}</h3>
+                <small>Tu compañero · Nivel {{ $escenaActual }}</small>
+                <p>Piense con calma y elija la opción que ayude a conversar y buscar apoyo.</p>
+
+                <div class="quiz-meter">
+                    <div><span>Respondidas</span><strong><span id="quizAnswered">0</span> de {{ count($preguntas) }}</strong></div>
+                    <div class="meter-track"><div class="meter-fill" id="quizProgressFill"></div></div>
+                    <div style="margin:10px 0 0"><span>Aciertos</span><strong><span id="quizCorrect">0</span> de {{ count($preguntas) }}</strong></div>
+                </div>
             </aside>
 
-        </main>
+            <div class="questions">
+                <p class="locked-note" id="lockedNote" role="status" hidden><i class="bi bi-lock-fill"></i> <span>Ya respondió este cuestionario. Solo se puede contestar una vez, por eso sus respuestas quedan guardadas.</span></p>
+                @foreach($preguntas as $n => $p)
+                    <article class="q" data-correct="{{ $p['correcta'] }}" data-ok="{{ $p['ok'] }}" data-mal="{{ $p['mal'] }}" data-por="{{ json_encode($p['por'] ?? (object) [], JSON_UNESCAPED_UNICODE) }}">
+                        <div class="q-top">
+                            <span class="q-num">Pregunta {{ $n + 1 }} de {{ count($preguntas) }}</span>
+                            <span class="q-xp">+10 XP</span>
+                        </div>
+                        <h3>{{ $p['texto'] }}</h3>
+                        <div class="answers">
+                            @foreach($p['opciones'] as $i => $opcion)
+                                <button type="button" class="answer" data-option="{{ $i }}">
+                                    <span class="letter">{{ $letras[$i] }}</span>
+                                    <span>{{ $opcion }}</span>
+                                </button>
+                            @endforeach
+                        </div>
+                        <div class="feedback" role="status" aria-live="polite" hidden></div>
+                    </article>
+                @endforeach
 
-        <div class="progress-area">
-
-            <div class="progress-step done">
-                <span class="progress-dot"></span>
-                <span>Introducción</span>
+                <div class="finish" id="quizFinish" hidden>
+                    <i class="bi bi-trophy-fill"></i>
+                    <div>
+                        <strong>¡Cuestionario completado!</strong>
+                        <p id="quizFinishText"></p>
+                    </div>
+                </div>
             </div>
-
-            <div class="progress-connector"></div>
-
-            <div class="progress-step active">
-                <span class="progress-dot"></span>
-                <span>Concepto</span>
-            </div>
-
-            <div class="progress-connector"></div>
-
-            <div class="progress-step">
-                <span class="progress-dot"></span>
-                <span>Efectos</span>
-            </div>
-
-            <div class="progress-connector"></div>
-
-            <div class="progress-step">
-                <span class="progress-dot"></span>
-                <span>Señales</span>
-            </div>
-
-            <div class="progress-connector"></div>
-
-            <div class="progress-step">
-                <span class="progress-dot"></span>
-                <span>Situación</span>
-            </div>
-
-            <div class="progress-connector"></div>
-
-            <div class="progress-step">
-                <span class="progress-dot"></span>
-                <span>Decisión</span>
-            </div>
-
-            <div class="progress-connector"></div>
-
-            <div class="progress-step">
-                <span class="progress-dot"></span>
-                <span>Reflexión</span>
-            </div>
-
-            <div class="progress-connector"></div>
-
-            <div class="progress-step">
-                <span class="progress-dot"></span>
-                <span>Cierre</span>
-            </div>
-
         </div>
+    </section>
 
-    </div>
-</div>
-
-<div class="toast-complete" id="completeModal">
-    <div class="complete-box">
-        <div class="complete-icon">
-            <i class="bi bi-check2-circle"></i>
-        </div>
-
-        <h2>Escena completada</h2>
-
-        <p>
-            Ya conoces algunas áreas en las que el alcohol puede afectar
-            la vida de un menor. Ahora vamos a observar las señales que
-            pueden llamar nuestra atención.
-        </p>
-
-        <div class="xp-earned">
-            <i class="bi bi-star-fill"></i>
-            +75 XP
-        </div>
-
-        <button class="btn-action btn-next w-100" type="button" onclick="irSiguiente()">
-            Ir a la siguiente escena
-            <i class="bi bi-arrow-right"></i>
+    {{-- ============ ACCIONES ============ --}}
+    <div class="actions">
+        <a class="btn" href="{{ $urlAnterior }}"><i class="bi bi-arrow-left"></i> Anterior</a>
+        <button class="btn btn-primary" id="btnCompletar" type="button" onclick="completarEscena()">
+            {{ $hayNivelSiguiente ? 'Continuar al Nivel ' . ($escenaActual + 1) : 'Finalizar recorrido' }} <i class="bi bi-arrow-right"></i>
         </button>
+        <p class="hint" id="quizHint" role="alert" hidden>Responda las dos preguntas para continuar al siguiente nivel.</p>
+    </div>
+
+</main>
+
+{{-- ============ RESULTADO / MEDALLA ============ --}}
+<div class="modal" id="resultModal" hidden>
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="medal-stage">
+            <img class="medal" id="medalImg" src="{{ $medallaImagen }}" alt="Medalla dorada con una estrella" hidden>
+            <div class="almost" id="almostIcon" hidden><i class="bi bi-flag-fill"></i></div>
+        </div>
+        <h2 id="modalTitle"></h2>
+        <p id="modalText"></p>
+        <div class="modal-stats">
+            <div><strong id="modalXp">0</strong><span>XP ganados</span></div>
+            <div><strong id="modalAciertos">0</strong><span>Aciertos</span></div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-primary" id="modalNext">
+                {{ $hayNivelSiguiente ? 'Continuar al Nivel ' . ($escenaActual + 1) : 'Finalizar recorrido' }} <i class="bi bi-arrow-right"></i>
+            </button>
+            <button type="button" class="btn" id="modalClose">Revisar mis respuestas</button>
+        </div>
     </div>
 </div>
 
 <script>
-    const escenaActual = 2;
-    const puntosEscena = 75;
+    (() => {
+        const PUNTOS = 10;
+        const BONO = 10;
+        let xp = 0;
+        let respondidas = 0;
+        let aciertos = 0;
 
+        const xpTotal = document.getElementById('xpTotal');
+        const quizAnswered = document.getElementById('quizAnswered');
+        const quizCorrect = document.getElementById('quizCorrect');
+        const quizProgressFill = document.getElementById('quizProgressFill');
+        const quizFinish = document.getElementById('quizFinish');
+        const quizFinishText = document.getElementById('quizFinishText');
+        const quizHint = document.getElementById('quizHint');
+        const tarjetas = Array.from(document.querySelectorAll('.q'));
 
-    /* =============================================================
-       EFECTO SELECCIONADO
-    ============================================================= */
-
-    let efectoSeleccionado = {
-        title: 'Cerebro y aprendizaje',
-        text: 'Durante la adolescencia el cerebro todavía está en desarrollo. El alcohol puede interferir con procesos relacionados con la memoria, el aprendizaje y la toma de decisiones.'
-    };
-
-
-    /* =============================================================
-       SELECCIONAR EFECTO
-    ============================================================= */
-
-    function seleccionarEfecto(card) {
-
-        document.querySelectorAll('.effect-card').forEach(item => {
-            item.classList.remove('active');
-        });
-
-        card.classList.add('active');
-
-        efectoSeleccionado = {
-            title: card.dataset.title,
-            text: card.dataset.text
-        };
-
-        document.getElementById('selectedTitle').textContent =
-            efectoSeleccionado.title;
-
-        document.getElementById('selectedText').textContent =
-            efectoSeleccionado.text;
-
-        document.getElementById('speechText').textContent =
-            efectoSeleccionado.title +
-            '. ' +
-            efectoSeleccionado.text;
-    }
-
-
-    /* =============================================================
-       OBTENER VOZ EN ESPAÑOL
-    ============================================================= */
-
-    function obtenerVozEspanol() {
-
-        if (!('speechSynthesis' in window)) {
-            return null;
+        function actualizar() {
+            xpTotal.textContent = xp;
+            quizAnswered.textContent = respondidas;
+            quizCorrect.textContent = aciertos;
+            quizProgressFill.style.width = (respondidas / tarjetas.length * 100) + '%';
         }
 
-        const voces = speechSynthesis.getVoices();
-
-        return (
-            voces.find(
-                voz => voz.lang.toLowerCase() === 'es-co'
-            )
-            ||
-            voces.find(
-                voz => voz.lang.toLowerCase().startsWith('es')
-            )
-            ||
-            null
-        );
-    }
-
-
-    /* =============================================================
-       ESCUCHAR EFECTO SELECCIONADO
-    ============================================================= */
-
-    function escuchar() {
-
-        if (!('speechSynthesis' in window)) {
-
-            alert(
-                'Tu navegador no permite reproducción de voz.'
-            );
-
-            return;
+        function mensaje(feedback, clase, titulo, texto) {
+            feedback.hidden = false;
+            feedback.className = 'feedback ' + clase;
+            feedback.textContent = '';
+            const strong = document.createElement('strong');
+            strong.textContent = titulo + ' ';
+            const span = document.createElement('span');
+            span.textContent = texto;
+            const box = document.createElement('div');
+            box.append(strong, span);
+            feedback.append(box);
         }
 
-        speechSynthesis.cancel();
+        const ESCENA = {{ $escenaActual }};
+        const HAY_SIGUIENTE = @json($hayNivelSiguiente);
+        const URL_SIGUIENTE = @json($urlSiguiente);
+        const POS_SIGUIENTE = {{ $posSiguiente }};
+        const POS_ACTUAL = {{ $porcentajeRecorrido }};
+        const CLAVE_QUIZ = @json($claveQuiz);
+        const NOMBRE_MEDALLA = @json($nombreMedalla);
+        let yendo = false;
 
-        const texto =
-            '.' +
-            efectoSeleccionado.title +
-            '. ' +
-            efectoSeleccionado.text;
+        const modal = document.getElementById('resultModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalText = document.getElementById('modalText');
+        const modalXp = document.getElementById('modalXp');
+        const modalAciertos = document.getElementById('modalAciertos');
+        const modalNext = document.getElementById('modalNext');
+        const modalClose = document.getElementById('modalClose');
+        const medalImg = document.getElementById('medalImg');
+        // Respaldo por si la imagen no carga: medalla dibujada en SVG
+        const MEDALLA_RESPALDO = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe58a"/><stop offset=".5" stop-color="#f0b429"/><stop offset="1" stop-color="#c88a0a"/></linearGradient></defs><path d="M30 0h26l16 54H46z" fill="#2469b3"/><path d="M90 0H64L48 54h26z" fill="#1f7a55"/><circle cx="60" cy="92" r="44" fill="url(#g)"/><circle cx="60" cy="92" r="34" fill="none" stroke="#fff6cf" stroke-width="3"/><polygon points="60,70 65.3,84.7 80.9,85.2 68.6,94.8 72.9,109.8 60,101 47.1,109.8 51.4,94.8 39.1,85.2 54.7,84.7" fill="#fffbe8"/></svg>');
+        medalImg.addEventListener('error', () => { medalImg.src = MEDALLA_RESPALDO; }, { once: true });
+        const almostIcon = document.getElementById('almostIcon');
+        const medalChip = document.getElementById('medalChip');
+        let focoPrevio = null;
 
-        reproducirTexto(texto);
-    }
-
-
-    /* =============================================================
-       REPRODUCIR TEXTO
-    ============================================================= */
-
-    function reproducirTexto(texto) {
-
-        const utterance =
-            new SpeechSynthesisUtterance(texto);
-
-        utterance.lang = 'es-CO';
-        utterance.rate = 0.94;
-        utterance.pitch = 1.05;
-        utterance.volume = 1;
-
-        const voz = obtenerVozEspanol();
-
-        if (voz) {
-            utterance.voice = voz;
+        function guardarProgreso() {
+            try {
+                const k = 'pp_progreso';
+                const d = JSON.parse(sessionStorage.getItem(k) || '{}');
+                d.niveles = d.niveles || {};
+                d.niveles[ESCENA] = { xp: xp, aciertos: aciertos, medalla: aciertos === tarjetas.length };
+                const lista = Object.values(d.niveles);
+                d.xp = lista.reduce((t, n) => t + n.xp, 0);
+                d.medallas = lista.filter(n => n.medalla).length;
+                sessionStorage.setItem(k, JSON.stringify(d));
+            } catch (e) { /* almacenamiento no disponible */ }
         }
 
-        speechSynthesis.speak(utterance);
-    }
-
-
-    /* =============================================================
-       AUDIO AUTOMÁTICO DE LA ESCENA
-    ============================================================= */
-
-    function reproducirEscenaAutomaticamente() {
-
-        if (!('speechSynthesis' in window)) {
-            return;
+        function confeti() {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const caja = document.getElementById('confetti');
+            caja.textContent = '';
+            const colores = ['#e9b530', '#2469b3', '#1f7a55', '#e0563c', '#8a5cf0'];
+            for (let i = 0; i < 70; i++) {
+                const c = document.createElement('i');
+                c.style.left = (Math.random() * 100) + '%';
+                c.style.background = colores[i % colores.length];
+                c.style.setProperty('--dx', (Math.random() * 160 - 80) + 'px');
+                c.style.setProperty('--rot', (Math.random() * 720) + 'deg');
+                c.style.animationDuration = (2.2 + Math.random() * 2) + 's';
+                c.style.animationDelay = (Math.random() * .7) + 's';
+                caja.append(c);
+            }
         }
 
-        const textoEscena = `
-           Bueno.
+        function mostrarResultado() {
+            const perfecto = aciertos === tarjetas.length;
+            guardarProgreso();
+            focoPrevio = document.activeElement;
 
-            En esta escena vamos a conocer algunos de los
-            efectos negativos que puede traer el consumo
-            de alcohol durante la adolescencia.
+            medalImg.hidden = !perfecto;
+            almostIcon.hidden = perfecto;
+            modalXp.textContent = xp;
+            modalAciertos.textContent = aciertos + '/' + tarjetas.length;
 
-            En los menores, el alcohol puede afectar distintas
-            áreas de la vida.
-
-            No se trata solamente de sentirse mal después
-            de beber.
-
-            También puede influir en el cerebro,
-            las decisiones, las relaciones y la seguridad.
-
-            Selecciona cada una de las tarjetas para conocer
-            más sobre estos efectos.
-        `;
-
-        speechSynthesis.cancel();
-
-        reproducirTexto(textoEscena);
-    }
-
-
-    /* =============================================================
-       XP
-    ============================================================= */
-
-    function obtenerXP() {
-
-        return parseInt(
-            localStorage.getItem('pontePilasXP') || '50',
-            10
-        );
-    }
-
-
-    function guardarXP(valor) {
-
-        localStorage.setItem(
-            'pontePilasXP',
-            valor
-        );
-    }
-
-
-    function actualizarXP() {
-
-        const xp = obtenerXP();
-
-        document.getElementById(
-            'xpValue'
-        ).textContent = xp;
-
-        const porcentaje =
-            Math.min(
-                (xp / 1075) * 100,
-                100
-            );
-
-        document.getElementById(
-            'xpFill'
-        ).style.width =
-            porcentaje + '%';
-    }
-
-
-    /* =============================================================
-       COMPLETAR ESCENA
-    ============================================================= */
-
-    function completarEscena() {
-
-        const completadas =
-            JSON.parse(
-                localStorage.getItem(
-                    'pontePilasEscenas'
-                ) || '[]'
-            );
-
-
-        if (!completadas.includes(escenaActual)) {
-
-            completadas.push(
-                escenaActual
-            );
-
-            localStorage.setItem(
-                'pontePilasEscenas',
-                JSON.stringify(completadas)
-            );
-
-
-            const nuevoXP =
-                obtenerXP() +
-                puntosEscena;
-
-
-            guardarXP(
-                nuevoXP
-            );
-        }
-
-
-        actualizarXP();
-
-
-        document
-            .getElementById('completeModal')
-            .classList.add('show');
-    }
-
-
-    /* =============================================================
-       SIGUIENTE ESCENA
-    ============================================================= */
-
-    function irSiguiente() {
-
-        window.location.href =
-            "{{ url('/aprende/escena/3') }}";
-    }
-
-
-    /* =============================================================
-       CARGAR ESCENA
-    ============================================================= */
-
-    actualizarXP();
-
-
-    /* =============================================================
-       REPRODUCCIÓN AUTOMÁTICA
-    ============================================================= */
-
-    window.addEventListener(
-        'load',
-        function () {
-
-            setTimeout(
-                function () {
-
-                    reproducirEscenaAutomaticamente();
-
-                },
-                800
-            );
-
-        }
-    );
-
-
-    /* =============================================================
-       CARGAR VOCES DEL NAVEGADOR
-    ============================================================= */
-
-    if ('speechSynthesis' in window) {
-
-        speechSynthesis.onvoiceschanged =
-            function () {
-
-                obtenerVozEspanol();
-
-            };
-    }
-
-
-    /* =============================================================
-       DETENER AUDIO AL SALIR
-    ============================================================= */
-
-    window.addEventListener(
-        'beforeunload',
-        function () {
-
-            if ('speechSynthesis' in window) {
-
-                speechSynthesis.cancel();
-
+            if (perfecto) {
+                modalTitle.textContent = '¡Medalla ganada!';
+                modalText.textContent = 'Ganó la medalla “' + NOMBRE_MEDALLA + '” por acertar las ' + tarjetas.length + ' preguntas.';
+                medalChip.hidden = false;
+            } else {
+                modalTitle.textContent = '¡Buen intento!';
+                modalText.textContent = 'Acertó ' + aciertos + ' de ' + tarjetas.length + '. Repase las señales y continúe: en el próximo nivel puede ganar su medalla.';
             }
 
+            modal.hidden = false;
+            modalNext.focus();
+            if (perfecto) confeti();
         }
-    );
 
+        function cerrarModal() {
+            modal.hidden = true;
+            if (focoPrevio && focoPrevio.focus) focoPrevio.focus({ preventScroll: true });
+        }
+
+        modalClose.addEventListener('click', cerrarModal);
+        modalNext.addEventListener('click', () => window.completarEscena());
+        medalChip.addEventListener('click', mostrarResultado);
+        modal.addEventListener('click', (e) => { if (e.target === modal) cerrarModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) cerrarModal(); });
+
+        // ---- Una sola oportunidad: las respuestas se guardan al instante ----
+        const lockedNote = document.getElementById('lockedNote');
+
+        function leerGuardado() {
+            try { return JSON.parse(localStorage.getItem(CLAVE_QUIZ) || '{}'); } catch (e) { return {}; }
+        }
+        function escribirGuardado(datos) {
+            try { localStorage.setItem(CLAVE_QUIZ, JSON.stringify(datos)); } catch (e) { /* almacenamiento no disponible */ }
+        }
+
+        const guardado = leerGuardado();
+        // { "0": 1, "1": 2 } → índice de pregunta : opción elegida
+        const respuestasGuardadas = (guardado.respuestas && typeof guardado.respuestas === 'object') ? guardado.respuestas : {};
+
+        function aplicarRespuesta(tarjeta, elegida) {
+            const correcta = Number(tarjeta.dataset.correct);
+            const opciones = Array.from(tarjeta.querySelectorAll('.answer'));
+            const feedback = tarjeta.querySelector('.feedback');
+
+            tarjeta.dataset.answered = 'true';
+            respondidas += 1;
+
+            opciones.forEach((b, i) => {
+                b.disabled = true;
+                if (i === correcta) b.classList.add('correct');
+            });
+
+            if (elegida === correcta) {
+                xp += PUNTOS;
+                aciertos += 1;
+                mensaje(feedback, 'good', '✓ ¡Correcto!', tarjeta.dataset.ok);
+            } else {
+                if (opciones[elegida]) opciones[elegida].classList.add('incorrect');
+                let por = {};
+                try { por = JSON.parse(tarjeta.dataset.por || '{}'); } catch (e) { /* sin mensajes específicos */ }
+                const extra = por[elegida] ? por[elegida] + ' ' : '';
+                mensaje(feedback, 'bad', 'Revise esta respuesta.', extra + tarjeta.dataset.mal);
+            }
+            actualizar();
+        }
+
+        function finalizarCuestionario(restaurando) {
+            const perfecto = aciertos === tarjetas.length;
+            if (perfecto) xp += BONO;
+            actualizar();
+
+            quizFinish.hidden = false;
+            quizFinishText.textContent = perfecto
+                ? 'Acertó las ' + tarjetas.length + ' preguntas y ganó ' + xp + ' XP, incluido el bono de ' + BONO + ' XP por no fallar ninguna.'
+                : 'Acertó ' + aciertos + ' de ' + tarjetas.length + ' preguntas y ganó ' + xp + ' XP. Repase el contenido de arriba para reforzar lo aprendido.';
+
+            if (perfecto) medalChip.hidden = false;
+            guardarProgreso();
+
+            // Al volver a la página no se repite la celebración
+            if (!restaurando) {
+                quizFinish.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                setTimeout(mostrarResultado, 900);
+            }
+        }
+
+        tarjetas.forEach((tarjeta, indice) => {
+            tarjeta.querySelectorAll('.answer').forEach((opcion) => {
+                opcion.addEventListener('click', () => {
+                    if (tarjeta.dataset.answered === 'true') return;
+                    const elegida = Number(opcion.dataset.option);
+
+                    // Se guarda antes de mostrar nada: recargar o volver atrás no permite cambiarla
+                    respuestasGuardadas[indice] = elegida;
+                    escribirGuardado({ respuestas: respuestasGuardadas });
+
+                    aplicarRespuesta(tarjeta, elegida);
+                    quizHint.hidden = true;
+
+                    if (respondidas === tarjetas.length) finalizarCuestionario(false);
+                });
+            });
+        });
+
+        // Restaurar lo ya respondido (recarga o regreso a la página)
+        let hayRestauradas = false;
+        tarjetas.forEach((tarjeta, indice) => {
+            const previa = respuestasGuardadas[indice];
+            if (Number.isInteger(previa) && previa >= 0) {
+                aplicarRespuesta(tarjeta, previa);
+                hayRestauradas = true;
+            }
+        });
+        if (hayRestauradas) {
+            lockedNote.hidden = false;
+            if (respondidas === tarjetas.length) finalizarCuestionario(true);
+        }
+
+        window.completarEscena = function () {
+            if (respondidas < tarjetas.length) {
+                const pendiente = tarjetas.find(t => t.dataset.answered !== 'true');
+                quizHint.hidden = false;
+                if (pendiente) {
+                    pendiente.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const primera = pendiente.querySelector('.answer:not(:disabled)');
+                    if (primera) primera.focus({ preventScroll: true });
+                }
+                return;
+            }
+            if (yendo) return;
+            yendo = true;
+
+            const boton = document.getElementById('btnCompletar');
+            boton.innerHTML = '<i class="bi bi-check-circle-fill"></i> Avanzando…';
+            boton.disabled = true;
+            modalNext.disabled = true;
+
+            guardarProgreso();
+            window.dispatchEvent(new CustomEvent('escena:completada', {
+                detail: { escena: ESCENA, xp: xp, aciertos: aciertos, medalla: aciertos === tarjetas.length, quizCompletado: true }
+            }));
+
+            // El avatar avanza al siguiente punto de la barra antes de cambiar de página
+            modal.hidden = true;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const fill = document.querySelector('.fill');
+            const marker = document.querySelector('.marker');
+            if (fill) fill.style.width = POS_SIGUIENTE + '%';
+            if (marker) marker.style.left = POS_SIGUIENTE + '%';
+
+            setTimeout(() => { window.location.href = URL_SIGUIENTE; }, 900);
+        };
+
+        // Si el navegador restaura la página desde caché al volver, se reactiva el botón
+        const textoBoton = document.getElementById('btnCompletar').innerHTML;
+        window.addEventListener('pageshow', (e) => {
+            if (!e.persisted) return;
+            yendo = false;
+            const b = document.getElementById('btnCompletar');
+            b.innerHTML = textoBoton;
+            b.disabled = false;
+            modalNext.disabled = false;
+            const fill = document.querySelector('.fill');
+            const marker = document.querySelector('.marker');
+            if (fill) fill.style.width = POS_ACTUAL + '%';
+            if (marker) marker.style.left = POS_ACTUAL + '%';
+        });
+
+        actualizar();
+    })();
 </script>
-
 </body>
 </html>

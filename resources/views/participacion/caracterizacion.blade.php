@@ -887,6 +887,62 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
   color:var(--verde);
 }
 
+.guide-audio-actions{
+  position:relative;
+  z-index:4;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:-2px 0 8px;
+}
+
+.guide-audio-actions .guide-audio-btn{
+  margin:0;
+}
+
+.guide-stop-btn{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:40px;
+  padding:9px 15px;
+  border:1px solid #E2C7C4;
+  border-radius:999px;
+  background:#fff;
+  color:#B9382F;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 5px 14px rgba(18,48,59,.07);
+  transition:
+    transform .2s ease,
+    background .2s ease,
+    border-color .2s ease,
+    color .2s ease,
+    box-shadow .2s ease,
+    opacity .2s ease;
+}
+
+.guide-stop-btn:hover:not(:disabled){
+  transform:translateY(-2px);
+  background:#FCECEA;
+  border-color:#D9AAA5;
+}
+
+.guide-stop-btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+.guide-stop-btn i{
+  font-size:16px;
+}
+
 .guide-audio-btn i{
   font-size:16px;
 }
@@ -908,8 +964,12 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
 }
 
 @media (max-width:820px){
-  .guide-audio-btn{
+  .guide-audio-actions{
     margin:0 0 9px;
+  }
+
+  .guide-audio-btn{
+    margin:0;
   }
 }
 
@@ -998,15 +1058,28 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
       </span>
     </div>
 
-    <button
-      type="button"
-      id="guideAudioBtn"
-      class="guide-audio-btn"
-      aria-label="Repetir mensaje de la guía"
-    >
-      <i class="bi bi-volume-up-fill"></i>
-      <span>Escuchar guía</span>
-    </button>
+    <div class="guide-audio-actions" aria-label="Controles de audio de la guía">
+      <button
+        type="button"
+        id="guideAudioBtn"
+        class="guide-audio-btn"
+        aria-label="Repetir mensaje de la guía"
+      >
+        <i class="bi bi-volume-up-fill"></i>
+        <span>Escuchar guía</span>
+      </button>
+
+      <button
+        type="button"
+        id="guideStopBtn"
+        class="guide-stop-btn"
+        aria-label="Detener la voz de la guía"
+        disabled
+      >
+        <i class="bi bi-stop-fill"></i>
+        <span>Detener</span>
+      </button>
+    </div>
 
     <span
       id="guideAudioStatus"
@@ -1117,7 +1190,7 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
       <div class="input-wrap"><i class="bi bi-person-hearts input-icon"></i>
         <select id="rol_familiar" name="rol_familiar" class="form-select with-icon" required>
           <option value="">Seleccione una opción</option>
-          @foreach(['Estudiante'=>'Estudiante','Padre'=>'Padre','Madre'=>'Madre','Acudiente'=>'Acudiente','Hermano'=>'Hermano/a','Tio'=>'Tío/a','Primo'=>'Primo/a','Abuelo'=>'Abuelo/a','Otro'=>'Otro'] as $v=>$t)
+          @foreach([''=>'','Padre'=>'Padre','Madre'=>'Madre','Acudiente'=>'Acudiente','Hermano'=>'Hermano/a','Tio'=>'Tío/a','Primo'=>'Primo/a','Abuelo'=>'Abuelo/a','Otro'=>'Otro'] as $v=>$t)
             <option value="{{ $v }}" {{ old('rol_familiar') == $v ? 'selected' : '' }}>{{ $t }}</option>
           @endforeach
         </select></div>
@@ -1303,6 +1376,7 @@ const $ = id => document.getElementById(id);
 
 const guidePanel = document.querySelector('.guide-panel');
 const guideAudioBtn = document.getElementById('guideAudioBtn');
+const guideStopBtn = document.getElementById('guideStopBtn');
 const guideAudioStatus = document.getElementById('guideAudioStatus');
 
 const textoGuia = `
@@ -1340,6 +1414,10 @@ function actualizarEstadoGuia(hablando) {
 
   guidePanel.classList.toggle('guide-speaking', hablando);
   guideAudioBtn.classList.toggle('playing', hablando);
+
+  if (guideStopBtn) {
+    guideStopBtn.disabled = !hablando;
+  }
 
   if (hablando) {
     guideAudioBtn.innerHTML = `
@@ -1437,6 +1515,28 @@ function iniciarAutoplayGuia() {
   }, 800);
 }
 
+function detenerGuia() {
+  guiaAutoplayPendiente = false;
+  guiaAudioIniciado = false;
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+
+  actualizarEstadoGuia(false);
+
+  if (guideAudioStatus) {
+    guideAudioStatus.textContent = 'Guía detenida';
+  }
+}
+
+if (guideStopBtn) {
+  guideStopBtn.addEventListener('click', function (event) {
+    event.stopPropagation();
+    detenerGuia();
+  });
+}
+
 if (guideAudioBtn) {
   guideAudioBtn.addEventListener('click', function () {
     guiaAutoplayPendiente = false;
@@ -1454,7 +1554,12 @@ if (guideAudioBtn) {
  * La primera interacción del usuario habilita la guía sin tener
  * que pulsar específicamente el botón de audio.
  */
-function liberarAudioConInteraccion() {
+function liberarAudioConInteraccion(event) {
+  if (event && event.target && event.target.closest('#guideStopBtn')) {
+    guiaAutoplayPendiente = false;
+    return;
+  }
+
   if (!guiaAutoplayPendiente || guiaAudioIniciado) {
     return;
   }

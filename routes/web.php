@@ -10,6 +10,8 @@ use App\Http\Controllers\TemaController;
 use App\Http\Controllers\ContenidoController;
 use App\Http\Controllers\AprendeController;
 use App\Http\Controllers\ParticipacionController;
+use App\Http\Controllers\EstadisticasController;
+use App\Http\Controllers\GraduacionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +71,10 @@ Route::get('/participacion', [
     ParticipacionController::class,
     'create'
 ])->name('participacion.create');
+
+Route::get('/aprende/graduacion', [GraduacionController::class, 'show'])
+    ->name('aprende.graduacion');
+
 /*
 |--------------------------------------------------------------------------
 | CLIENTE / PARTICIPANTE
@@ -440,6 +446,15 @@ Route::prefix('admin')
     Route::delete('/admin/recursos/{recurso}', [ContenidoController::class, 'destroyRecurso'])
         ->name('admin.recursos.destroy');
 });
+
+
+//*-------------------MAPA DE CALOR---------------------------------*/
+
+// Esta ruta está dentro del grupo prefix('admin'), por eso aquí solo va '/estadisticas'.
+// La URL resultante será /admin/estadisticas y conserva el middleware auth del grupo.
+Route::get('/estadisticas', [EstadisticasController::class, 'index'])
+    ->name('admin.estadisticas.index');
+
 
 
 
