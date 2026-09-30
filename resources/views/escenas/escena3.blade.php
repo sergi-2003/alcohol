@@ -97,12 +97,7 @@
             'voz'   => 'Quiero que hagamos un acuerdo. Si alguna vez te sientes presionado a tomar alcohol o estás en una situación en la que no te sientes seguro, puedes llamarme. Voy por ti, sin que tengas que preocuparte por cómo explicármelo en ese momento. Después hablaremos con calma y buscaremos juntos una solución. ¿Hacemos ese pacto?',
             'audio' => $audioNivel3('nivel3-04-acuerdo.mp3'),
         ],
-        [
-            'etapa' => 'Respuesta al acuerdo', 'corto' => 'Acepta', 'personaje' => 'joven',
-            'texto' => 'Sí. Me ayudaría saber que puedo llamarte si algo se sale de control, aunque me dé miedo contarte lo que pasó.',
-            'voz'   => 'Sí. Me ayudaría saber que puedo llamarte si algo se sale de control, aunque me dé miedo contarte lo que pasó.',
-            'audio' => $audioNivel3('nivel3-05-respuesta-acuerdo.mp3'),
-        ],
+     
         [
             'etapa' => 'Cierre', 'corto' => 'Cierre', 'personaje' => 'guia',
             'texto' => 'Esto no cambia lo que siento por ti. Quiero ayudarte a tomar buenas decisiones — juntos.',

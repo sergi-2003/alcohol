@@ -495,6 +495,26 @@
 
             @endif
 
+             {{-- ================================================
+                 MAPA DE CALOR
+            ================================================= --}}
+
+            @if(
+                auth()->user()->rol &&
+                auth()->user()->rol->tienePermiso('contenidos.ver')
+            )
+
+                <a
+                    href="{{ route('admin.estadisticas.index') }}"
+                    class="menu-link {{ request()->routeIs('admin.estadisticas.*') ? 'active' : '' }}"
+                >
+                    <i class="bi bi-journal-text"></i>
+                    Mapa de calor
+                </a>
+
+
+            @endif
+
 
             {{-- ================================================
                  ACTIVIDADES

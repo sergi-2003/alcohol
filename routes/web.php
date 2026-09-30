@@ -12,6 +12,7 @@ use App\Http\Controllers\AprendeController;
 use App\Http\Controllers\ParticipacionController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\GraduacionController;
+use App\Http\Controllers\Admin\IndicadoresController;
 
 /*
 |--------------------------------------------------------------------------
@@ -281,6 +282,7 @@ Route::get('/media/recursos/{filename}', function ($filename) {
 
 
 })->name('media.recurso');
+
 /*
 |--------------------------------------------------------------------------
 | ADMINISTRACIÓN
@@ -352,6 +354,14 @@ Route::prefix('admin')
         ->middleware('permiso:usuarios.editar')
         ->name('admin.usuarios.toggle');
 
+
+
+// Indicadores administrativos
+Route::get('/indicadores', [
+    IndicadoresController::class,
+    'index'
+])
+    ->name('admin.indicadores');
 
 
 
