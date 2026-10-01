@@ -297,6 +297,24 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
 .submit-btn:hover{transform:translateY(-2px);filter:brightness(1.05)}
 .page-footer{margin-top:24px;text-align:center;font-size:15px;color:var(--suave)}
 
+/* MODAL DE ADVERTENCIA PARA PARTICIPACIÓN ANÓNIMA */
+.anonymous-warning-modal .terms-dialog{width:min(650px,100%)}
+.anonymous-warning-modal .terms-header-icon{background:#B77900}
+.anonymous-warning-modal .terms-notice{background:#FFF6D0;border:1px solid #F0DFA0}
+.anonymous-warning-modal .terms-notice>i{color:#8A5A00}
+.anonymous-warning-modal .warning-list{display:grid;gap:12px;margin:16px 0;padding:0;list-style:none}
+.anonymous-warning-modal .warning-list li{display:flex;align-items:flex-start;gap:11px;padding:13px 14px;border:1px solid var(--linea);border-radius:10px;background:#fff}
+.anonymous-warning-modal .warning-list i{color:var(--rojo);font-size:20px;flex-shrink:0;margin-top:2px}
+.anonymous-warning-modal .warning-list strong{display:block;color:var(--tinta);margin-bottom:2px}
+.anonymous-warning-modal .warning-list span{display:block;color:var(--suave);font-size:15px}
+.anonymous-warning-modal .anonymous-data-note{padding:13px 15px;background:#E6F4EC;border-left:4px solid var(--verde);border-radius:0 9px 9px 0;color:#14532D;font-size:14px}
+.anonymous-warning-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.anonymous-warning-actions button{min-height:46px;padding:10px 17px;border-radius:10px;font:700 15px var(--cuerpo);cursor:pointer}
+.anonymous-warning-actions .btn-register{border:1px solid var(--azul);background:#fff;color:var(--azul)}
+.anonymous-warning-actions .btn-continue{border:0;background:var(--verde);color:#fff}
+.anonymous-warning-actions .btn-continue:hover{background:#186338}
+@media(max-width:600px){.anonymous-warning-modal{padding:12px}.anonymous-warning-modal .terms-header{padding:15px}.anonymous-warning-modal .terms-body{padding:17px}.anonymous-warning-modal .terms-footer{align-items:stretch;flex-direction:column}.anonymous-warning-actions{display:grid;grid-template-columns:1fr}.anonymous-warning-actions button{width:100%}}
+
 /* MODAL TÉRMINOS */
 .terms-modal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px}
 .terms-modal.active{display:flex}
@@ -1052,11 +1070,17 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
     <div class="guide-bubble-large">
       <strong>¡Hola!</strong>
       <span>
-        Te acompañaré paso a paso durante la experiencia.
-        Elige con calma tus opciones y descubre herramientas
-        para fortalecer la prevención desde el hogar.
+        Te acompañaré durante este recorrido educativo.
+        Completa la información solicitada y elige el personaje que te acompañará.
+        Si prefieres participar sin datos de identificación, podrás conocer las condiciones antes de continuar.
       </span>
     </div>
+
+    <audio
+      id="guideAudio"
+      preload="auto"
+      src="{{ asset('build/audio/formulario.mp3') }}"
+    ></audio>
 
     <div class="guide-audio-actions" aria-label="Controles de audio de la guía">
       <button
@@ -1116,15 +1140,15 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
     <div class="anonymous-option-icon"><i class="bi bi-incognito"></i></div>
     <div class="anonymous-option-content">
       <div class="anonymous-title">
-        <strong>¿Desea participar de forma anónima?</strong>
-        <span>Puede realizar la experiencia sin registrar sus datos personales.</span>
+        <strong>¿Cómo desea participar?</strong>
+        <span>Puede continuar sin registrar datos de identificación. Antes de elegir esta modalidad, revise las funciones que estarán disponibles y la información general que seguirá solicitándose.</span>
       </div>
       <label class="anonymous-switch">
         {{-- El hidden va ANTES del checkbox: si comparten name, PHP toma el último valor. --}}
         <input type="hidden" name="es_anonimo" value="0">
         <input type="checkbox" id="es_anonimo" name="es_anonimo" value="1">
         <span class="anonymous-slider"></span>
-        <span class="anonymous-label">Participar de forma anónima</span>
+        <span class="anonymous-label">Continuar sin datos de identificación</span>
       </label>
     </div>
   </div>
@@ -1307,6 +1331,36 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
   </div>
 </div>
 
+<div class="terms-modal anonymous-warning-modal" id="anonymousWarningModal" aria-hidden="true">
+  <div class="terms-overlay" id="anonymousWarningOverlay"></div>
+  <div class="terms-dialog" role="dialog" aria-modal="true" aria-labelledby="anonymousWarningTitle" aria-describedby="anonymousWarningDescription">
+    <div class="terms-header">
+      <div class="terms-header-icon"><i class="bi bi-incognito"></i></div>
+      <div class="terms-header-copy">
+        <span>Antes de continuar</span>
+        <h2 id="anonymousWarningTitle">Participación sin datos de identificación</h2>
+      </div>
+      <button type="button" class="terms-close" id="btnCerrarAvisoAnonimo" aria-label="Cerrar aviso"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="terms-body" id="anonymousWarningDescription">
+      <div class="terms-notice"><i class="bi bi-info-circle-fill"></i><p>Puede realizar el recorrido educativo sin registrar nombre ni documento. Sin embargo, esta modalidad tiene algunas limitaciones.</p></div>
+      <ul class="warning-list">
+        <li><i class="bi bi-award"></i><div><strong>Certificado</strong><span>No podrás obtener un certificado individual si para generarlo es necesario verificar tu identidad.</span></div></li>
+        <li><i class="bi bi-chat-left-text"></i><div><strong>Devolución personalizada</strong><span>No recibirás una devolución vinculada a tu identidad ni recomendaciones basadas en un perfil personal.</span></div></li>
+        <li><i class="bi bi-graph-up-arrow"></i><div><strong>Historial de progreso</strong><span>Tu avance no quedará asociado a una cuenta personal, por lo que no podrás consultar un historial individual posteriormente.</span></div></li>
+      </ul>
+      <div class="anonymous-data-note"><strong>Ten presente:</strong> para elaborar estadísticas generales, el formulario todavía puede solicitar algunos datos de contexto, como edad, relación familiar y lugar donde se realiza la actividad. Por eso, esta opción evita datos de identificación directa, pero no significa que no se recopile ningún dato.</div>
+    </div>
+    <div class="terms-footer">
+      <span>Un Sorbito Hoy, Un Problema Mañana · Tu participación es voluntaria.</span>
+      <div class="anonymous-warning-actions">
+        <button type="button" class="btn-register" id="btnElegirRegistro">Prefiero registrarme</button>
+        <button type="button" class="btn-continue" id="btnContinuarAnonimo">Continuar sin identificarme <i class="bi bi-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="terms-modal" id="termsModal" aria-hidden="true">
   <div class="terms-overlay" id="termsOverlay"></div>
   <div class="terms-dialog" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
@@ -1371,58 +1425,32 @@ const $ = id => document.getElementById(id);
 
 
 /* =========================================================
-   AUDIO AUTOMÁTICO DE LA GUÍA
+   AUDIO DE LA GUÍA DESDE ARCHIVO MP3
 ========================================================= */
 
 const guidePanel = document.querySelector('.guide-panel');
 const guideAudioBtn = document.getElementById('guideAudioBtn');
 const guideStopBtn = document.getElementById('guideStopBtn');
 const guideAudioStatus = document.getElementById('guideAudioStatus');
-
-const textoGuia = `
-¡Hola! Soy tu guía en este recorrido.
-Te acompañaré paso a paso durante la experiencia.
-Primero completa la información solicitada.
-Después podrás elegir el personaje que te acompañará
-y comenzar tu recorrido por Un Sorbito Hoy, Un Problema Mañana.
-Tómate tu tiempo, lee cada sección y descubre herramientas
-que puedes aplicar en el hogar para fortalecer la prevención.
-
-Recuerda: Puedes participar de manera anónima si así lo prefieres. En ese caso, no tendrás que registrar tus datos personales.
-`;
+const guideAudio = document.getElementById('guideAudio');
 
 let guiaAudioIniciado = false;
 let guiaAutoplayPendiente = true;
-let guiaVozListenerRegistrado = false;
 
-function obtenerVozEspanol() {
-  if (!('speechSynthesis' in window)) {
-    return null;
-  }
-
-  const voces = window.speechSynthesis.getVoices();
-
-  return (
-    voces.find(voz => voz.lang && voz.lang.toLowerCase() === 'es-co') ||
-    voces.find(voz => voz.lang && voz.lang.toLowerCase().startsWith('es')) ||
-    null
-  );
-}
-
-function actualizarEstadoGuia(hablando) {
+function actualizarEstadoGuia(reproduciendo) {
   if (!guidePanel || !guideAudioBtn || !guideAudioStatus) return;
 
-  guidePanel.classList.toggle('guide-speaking', hablando);
-  guideAudioBtn.classList.toggle('playing', hablando);
+  guidePanel.classList.toggle('guide-speaking', reproduciendo);
+  guideAudioBtn.classList.toggle('playing', reproduciendo);
 
   if (guideStopBtn) {
-    guideStopBtn.disabled = !hablando;
+    guideStopBtn.disabled = !reproduciendo;
   }
 
-  if (hablando) {
+  if (reproduciendo) {
     guideAudioBtn.innerHTML = `
       <i class="bi bi-volume-up-fill"></i>
-      <span>La guía está hablando...</span>
+      <span>La guía está reproduciéndose...</span>
     `;
     guideAudioStatus.textContent = 'Escuchando a su guía';
     guideAudioStatus.classList.add('speaking');
@@ -1431,103 +1459,65 @@ function actualizarEstadoGuia(hablando) {
       <i class="bi bi-volume-up-fill"></i>
       <span>Escuchar guía</span>
     `;
-    guideAudioStatus.textContent = '';
     guideAudioStatus.classList.remove('speaking');
   }
 }
 
-function hablarGuia() {
-  if (!('speechSynthesis' in window)) {
-    if (guideAudioStatus) {
-      guideAudioStatus.textContent =
-        'Su navegador no permite reproducir la voz de la guía.';
+async function reproducirGuia() {
+  if (!guideAudio) return false;
+
+  try {
+    // Si el audio ya terminó, comienza nuevamente desde el inicio.
+    if (guideAudio.ended) guideAudio.currentTime = 0;
+
+    const resultado = guideAudio.play();
+    if (resultado && typeof resultado.then === 'function') {
+      await resultado;
     }
-    return false;
-  }
 
-  const voz = obtenerVozEspanol();
-
-  if (!voz && !guiaVozListenerRegistrado) {
-    guiaVozListenerRegistrado = true;
-
-    window.speechSynthesis.addEventListener(
-      'voiceschanged',
-      function escucharVoces() {
-        guiaVozListenerRegistrado = false;
-        hablarGuia();
-      },
-      { once: true }
-    );
-
-    // Algunos navegadores no disparan voiceschanged de forma consistente.
-    // Reintentamos unos milisegundos después.
-    setTimeout(function () {
-      if (!window.speechSynthesis.speaking) {
-        hablarGuia();
-      }
-    }, 450);
-
-    return false;
-  }
-
-  window.speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(textoGuia);
-
-  utterance.lang = voz ? voz.lang : 'es-CO';
-  utterance.rate = 0.94;
-  utterance.pitch = 1.05;
-  utterance.volume = 1;
-
-  if (voz) {
-    utterance.voice = voz;
-  }
-
-  utterance.onstart = function () {
     guiaAudioIniciado = true;
     guiaAutoplayPendiente = false;
     actualizarEstadoGuia(true);
-  };
-
-  utterance.onend = function () {
+    return true;
+  } catch (error) {
+    // Los navegadores pueden bloquear el autoplay hasta que el usuario interactúe.
+    if (guideAudioStatus) {
+      guideAudioStatus.textContent = 'Pulsa «Escuchar guía» para reproducir el audio.';
+    }
     actualizarEstadoGuia(false);
-  };
-
-  utterance.onerror = function () {
-    actualizarEstadoGuia(false);
-  };
-
-  window.speechSynthesis.resume();
-  window.speechSynthesis.speak(utterance);
-
-  return true;
-}
-
-function iniciarAutoplayGuia() {
-  if (guiaAudioIniciado || !guiaAutoplayPendiente) {
-    return;
+    return false;
   }
-
-  // Igual que en las escenas: esperamos un pequeño instante después
-  // de cargar la página para que el navegador prepare las voces.
-  setTimeout(function () {
-    hablarGuia();
-  }, 800);
 }
 
 function detenerGuia() {
   guiaAutoplayPendiente = false;
   guiaAudioIniciado = false;
 
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
+  if (guideAudio) {
+    guideAudio.pause();
+    guideAudio.currentTime = 0;
   }
 
   actualizarEstadoGuia(false);
+  if (guideAudioStatus) guideAudioStatus.textContent = 'Audio detenido';
+}
 
-  if (guideAudioStatus) {
-    guideAudioStatus.textContent = 'Guía detenida';
-  }
+if (guideAudio) {
+  guideAudio.addEventListener('play', () => actualizarEstadoGuia(true));
+  guideAudio.addEventListener('ended', () => {
+    guiaAudioIniciado = false;
+    actualizarEstadoGuia(false);
+    if (guideAudioStatus) guideAudioStatus.textContent = 'Audio finalizado';
+  });
+  guideAudio.addEventListener('pause', () => {
+    if (!guideAudio.ended) actualizarEstadoGuia(false);
+  });
+  guideAudio.addEventListener('error', () => {
+    actualizarEstadoGuia(false);
+    if (guideAudioStatus) {
+      guideAudioStatus.textContent = 'No se pudo cargar formulario.mp3. Verifica la ubicación del archivo.';
+    }
+  });
 }
 
 if (guideStopBtn) {
@@ -1540,48 +1530,21 @@ if (guideStopBtn) {
 if (guideAudioBtn) {
   guideAudioBtn.addEventListener('click', function () {
     guiaAutoplayPendiente = false;
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-
-    hablarGuia();
+    reproducirGuia();
   });
 }
 
-/*
- * Fallback para navegadores que bloquean la voz automática.
- * La primera interacción del usuario habilita la guía sin tener
- * que pulsar específicamente el botón de audio.
- */
-function liberarAudioConInteraccion(event) {
-  if (event && event.target && event.target.closest('#guideStopBtn')) {
-    guiaAutoplayPendiente = false;
-    return;
+function iniciarAutoplayGuia() {
+  if (!guiaAudioIniciado && guiaAutoplayPendiente) {
+    // Se intenta iniciar automáticamente; si el navegador lo bloquea,
+    // el botón «Escuchar guía» permite reproducirlo con un clic.
+    reproducirGuia();
   }
-
-  if (!guiaAutoplayPendiente || guiaAudioIniciado) {
-    return;
-  }
-
-  guiaAutoplayPendiente = false;
-  hablarGuia();
-
-  document.removeEventListener('pointerdown', liberarAudioConInteraccion);
-  document.removeEventListener('keydown', liberarAudioConInteraccion);
-  document.removeEventListener('touchstart', liberarAudioConInteraccion);
 }
 
-document.addEventListener('pointerdown', liberarAudioConInteraccion, { passive: true });
-document.addEventListener('keydown', liberarAudioConInteraccion, { passive: true });
-document.addEventListener('touchstart', liberarAudioConInteraccion, { passive: true });
-
 window.addEventListener('load', iniciarAutoplayGuia);
-
 window.addEventListener('beforeunload', function () {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-  }
+  if (guideAudio) guideAudio.pause();
 });
 
 const municipioInput = $('municipio'), zonaInput = $('zona'), latitudInput = $('latitud'),
@@ -1646,9 +1609,16 @@ function detectarUbicacion() {
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 });
 }
 
-/* Modo anónimo */
+/* Modal y comportamiento de participación sin datos de identificación */
 const esAnonimo = $('es_anonimo'), anonymousOption = $('anonymousOption');
 const camposAnonimos = document.querySelectorAll('.anonymous-field input, .anonymous-field select');
+const anonymousWarningModal = $('anonymousWarningModal');
+let focoAntesAvisoAnonimo = null;
+
+// Guardar el estado original de required para restaurarlo al volver al registro.
+camposAnonimos.forEach(campo => {
+  campo.dataset.requiredOriginal = campo.required ? '1' : '0';
+});
 
 function actualizarModoAnonimo() {
   const anonimo = esAnonimo.checked;
@@ -1656,15 +1626,52 @@ function actualizarModoAnonimo() {
   camposAnonimos.forEach(campo => {
     const contenedor = campo.closest('.field');
     if (anonimo) {
-      campo.disabled = true; campo.required = false; campo.value = '';
+      campo.disabled = true;
+      campo.required = false;
+      campo.value = '';
       contenedor.classList.add('anonymous-disabled');
     } else {
       campo.disabled = false;
+      campo.required = campo.dataset.requiredOriginal === '1';
       contenedor.classList.remove('anonymous-disabled');
     }
   });
 }
-esAnonimo.addEventListener('change', actualizarModoAnonimo);
+
+function abrirAvisoAnonimo() {
+  focoAntesAvisoAnonimo = document.activeElement;
+  anonymousWarningModal.classList.add('active');
+  anonymousWarningModal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  $('btnContinuarAnonimo').focus();
+}
+
+function cerrarAvisoAnonimo({cancelar = false} = {}) {
+  anonymousWarningModal.classList.remove('active');
+  anonymousWarningModal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  if (cancelar) {
+    esAnonimo.checked = false;
+    actualizarModoAnonimo();
+    esAnonimo.focus();
+  } else if (focoAntesAvisoAnonimo && typeof focoAntesAvisoAnonimo.focus === 'function') {
+    focoAntesAvisoAnonimo.focus();
+  }
+}
+
+esAnonimo.addEventListener('change', () => {
+  actualizarModoAnonimo();
+  if (esAnonimo.checked) abrirAvisoAnonimo();
+});
+$('btnContinuarAnonimo').addEventListener('click', () => cerrarAvisoAnonimo());
+$('btnElegirRegistro').addEventListener('click', () => cerrarAvisoAnonimo({cancelar: true}));
+$('btnCerrarAvisoAnonimo').addEventListener('click', () => cerrarAvisoAnonimo({cancelar: true}));
+$('anonymousWarningOverlay').addEventListener('click', () => cerrarAvisoAnonimo({cancelar: true}));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && anonymousWarningModal.classList.contains('active')) {
+    cerrarAvisoAnonimo({cancelar: true});
+  }
+});
 actualizarModoAnonimo();
 
 $('btnDetectarUbicacion').addEventListener('click', detectarUbicacion);

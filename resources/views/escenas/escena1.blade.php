@@ -384,7 +384,7 @@
     <section class="stat" aria-label="Dato informativo">
         <div class="stat-num">34%</div>
         <div>
-            <h3>Dato Quindio 2022</h3>
+            <h3>Dato Armenia 2022</h3>
             <p>En el Quindío, el 27,5 % de los estudiantes ha consumido alcohol. La edad de inicio se encuentra alrededor de los 13 años, por lo que la prevención y el acompañamiento familiar son fundamentales desde edades tempranas. el alcohol puede convertirse en una de las primeras sustancias exploradas durante la adolescencia. La sustancia exploratoria es aquella que un adolescente prueba por curiosidad, presión de grupo o deseo de experimentar. Prevenir también significa acompañar ese primer acercamiento y hablar a tiempo.</p>
         </div>
     </section>

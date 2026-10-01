@@ -44,15 +44,6 @@
     }
 
     $avatarFallback = asset('build/img/avatars/cuerpo.webp');
-    // Imagen del joven que responde en la conversación del nivel 3.
-    $avatarRespuesta = asset('build/img/avatars/avatar-nivel3.webp');
-    // Ruta alternativa por si el archivo se guardó directamente en public/build/img/.
-    $avatarRespuestaAlternativa = asset('build/img/avatar-nivel3.webp');
-
-    // Usa el MP3 real si ya está instalado; si todavía no existe, conserva la voz del navegador.
-    $audioNivel3 = fn ($archivo) => file_exists(public_path('build/audio/' . $archivo))
-        ? asset('build/audio/' . $archivo)
-        : null;
 
     // Etapas del recorrido
     $etapas = ['Reconocer','Entender','Hablar','Prevenir'];
@@ -74,35 +65,28 @@
      */
     $guion = [
         [
-            'etapa' => 'Apertura', 'corto' => 'Apertura', 'personaje' => 'guia',
+            'etapa' => 'Apertura', 'corto' => 'Apertura',
             'texto' => 'Quiero hablar de algo importante. No estoy enojado/a — estoy preocupado/a porque te quiero. ¿Podemos sentarnos un momento?',
             'voz'   => 'Quiero hablar de algo importante. No estoy enojado, estoy preocupado, porque te quiero. ¿Podemos sentarnos un momento?',
-            'audio' => $audioNivel3('nivel3-01-apertura.mp3'),
+            'audio' => null,
         ],
         [
-            'etapa' => 'Respuesta del joven', 'corto' => 'Responde', 'personaje' => 'joven',
-            'texto' => 'Sí, he tomado alcohol. A veces mis amigos insisten y me cuesta decir que no.',
-            'voz'   => 'Sí, he tomado alcohol. A veces mis amigos insisten y me cuesta decir que no.',
-            'audio' => $audioNivel3('nivel3-02-respuesta-joven.mp3'),
-        ],
-        [
-            'etapa' => 'Si confirma el consumo', 'corto' => 'Escuchar', 'personaje' => 'guia',
+            'etapa' => 'Si confirma el consumo', 'corto' => 'Si confirma',
             'texto' => 'Gracias por decirme la verdad. Cuéntame — ¿cómo te has sentido cuando lo hiciste?',
             'voz'   => 'Gracias por decirme la verdad. Cuéntame, ¿cómo te has sentido cuando lo hiciste?',
-            'audio' => $audioNivel3('nivel3-03-escuchar.mp3'),
+            'audio' => null,
         ],
         [
-            'etapa' => 'Propuesta de acuerdo', 'corto' => 'Acuerdo', 'personaje' => 'guia',
-            'texto' => 'Quiero que hagamos un acuerdo: si alguna vez te sientes presionado a tomar alcohol o estás en una situación en la que no te sientes seguro, puedes llamarme. Voy por ti, sin que tengas que preocuparte por cómo explicármelo en ese momento. Después hablaremos con calma y buscaremos juntos una solución. ¿Hacemos ese pacto?',
-            'voz'   => 'Quiero que hagamos un acuerdo. Si alguna vez te sientes presionado a tomar alcohol o estás en una situación en la que no te sientes seguro, puedes llamarme. Voy por ti, sin que tengas que preocuparte por cómo explicármelo en ese momento. Después hablaremos con calma y buscaremos juntos una solución. ¿Hacemos ese pacto?',
-            'audio' => $audioNivel3('nivel3-04-acuerdo.mp3'),
+            'etapa' => 'Propuesta de acuerdo', 'corto' => 'Acuerdo',
+            'texto' => 'Si algún día sientes presión, me llamas y voy por ti — sin preguntas, sin castigo. ¿Hacemos ese pacto?',
+            'voz'   => 'Si algún día sientes presión, me llamas y voy por ti, sin preguntas, sin castigo. ¿Hacemos ese pacto?',
+            'audio' => null,
         ],
-     
         [
-            'etapa' => 'Cierre', 'corto' => 'Cierre', 'personaje' => 'guia',
+            'etapa' => 'Cierre', 'corto' => 'Cierre',
             'texto' => 'Esto no cambia lo que siento por ti. Quiero ayudarte a tomar buenas decisiones — juntos.',
             'voz'   => 'Esto no cambia lo que siento por ti. Quiero ayudarte a tomar buenas decisiones, juntos.',
-            'audio' => $audioNivel3('nivel3-06-cierre.mp3'),
+            'audio' => null,
         ],
     ];
 
@@ -159,6 +143,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Cómo hablar | Aprende</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -491,10 +476,10 @@
         <div class="speaker" id="speaker">
             <div class="speaker-side">
                 <div class="speaker-img">
-                    <img id="spkAvatarImg" src="{{ $avatarRuta }}" alt="{{ $avatarNombre }} hablando">
+                    <img src="{{ $avatarRuta }}" alt="{{ $avatarNombre }} hablando" onerror="this.onerror=null;this.src='{{ $avatarFallback }}'">
                 </div>
                 <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-                <div class="speaker-name" id="spkAvatarName">{{ $avatarNombre }}<small id="spkAvatarSubtitle">Tu compañero te lo cuenta</small></div>
+                <div class="speaker-name">{{ $avatarNombre }}<small>Tu compañero te lo cuenta</small></div>
             </div>
 
             <div class="speaker-main">
@@ -519,7 +504,7 @@
                     <button type="button" class="btn" id="btnVel" aria-pressed="false"><i class="bi bi-speedometer2"></i> <span>Velocidad normal</span></button>
                 </div>
 
-                <p class="spk-note" id="spkNote">Pulse «Escuchar este paso» cuando quiera oír cada intervención. Al terminar la apertura aparecerá el joven; su audio no comenzará hasta que usted lo reproduzca.</p>
+                <p class="spk-note" id="spkNote">La voz depende de su dispositivo. También puede leer el guion completo aquí abajo.</p>
 
                 <details class="transcript" id="spkTranscript">
                     <summary>Leer el guion completo</summary>
@@ -677,6 +662,7 @@
         const POS_SIGUIENTE = {{ $posSiguiente }};
         const POS_ACTUAL = {{ $porcentajeRecorrido }};
         const CLAVE_QUIZ = @json($claveQuiz);
+        const URL_AVANCE = @json(url('/avance-escena'));
         const NOMBRE_MEDALLA = @json($nombreMedalla);
         let yendo = false;
 
@@ -801,6 +787,27 @@
             actualizar();
         }
 
+        // Envía el resultado a la base de datos (el servidor solo guarda el primero de cada escena)
+        function enviarAvance() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            fetch(URL_AVANCE, {
+                method: 'POST',
+                credentials: 'same-origin',
+                keepalive: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': meta ? meta.content : ''
+                },
+                body: JSON.stringify({
+                    escena: ESCENA,
+                    aciertos: aciertos,
+                    total: tarjetas.length,
+                    respuestas: respuestasGuardadas
+                })
+            }).catch(() => { /* sin conexión: se reintenta al volver a abrir la escena */ });
+        }
+
         function finalizarCuestionario(restaurando) {
             const perfecto = aciertos === tarjetas.length;
             if (perfecto) xp += BONO;
@@ -813,6 +820,7 @@
 
             if (perfecto) medalChip.hidden = false;
             guardarProgreso();
+            enviarAvance();
 
             // Al volver a la página no se repite la celebración
             if (!restaurando) {
@@ -922,13 +930,6 @@
         const btnVel = document.getElementById('btnVel');
         const nota = document.getElementById('spkNote');
         const guionCompleto = document.getElementById('spkTranscript');
-        const avatarImg = document.getElementById('spkAvatarImg');
-        const avatarNombreEl = document.getElementById('spkAvatarName');
-        const avatarSubtituloEl = document.getElementById('spkAvatarSubtitle');
-        const AVATAR_GUIA = @json($avatarRuta);
-        const AVATAR_GUIA_NOMBRE = @json($avatarNombre);
-        const AVATAR_RESPUESTA = @json($avatarRespuesta);
-        const AVATAR_RESPUESTA_ALTERNATIVA = @json($avatarRespuestaAlternativa);
 
         const sintesis = ('speechSynthesis' in window) ? window.speechSynthesis : null;
         const audioEl = new Audio();
@@ -968,43 +969,6 @@
             actual = i;
             etiqueta.textContent = PASOS[i].etapa;
             texto.textContent = PASOS[i].texto;
-
-            // Solo cambia el personaje de la conversación; el avatar elegido del usuario
-            // sigue intacto en la barra de progreso y en el cuestionario.
-            const respondeElJoven = PASOS[i].personaje === 'joven';
-            // Si la imagen no está en la carpeta esperada, prueba la ruta alternativa.
-            // Evita reemplazar silenciosamente al joven por el avatar seleccionado.
-            avatarImg.onerror = function () {
-                if (respondeElJoven && !this.dataset.proboRutaAlternativa) {
-                    this.dataset.proboRutaAlternativa = '1';
-                    this.src = AVATAR_RESPUESTA_ALTERNATIVA;
-                    return;
-                }
-                this.onerror = null;
-                if (respondeElJoven) {
-                    this.alt = 'No se encontró avatar-nivel3.webp. Verifique la carpeta public/build/img/avatars/';
-                } else {
-                    this.src = AVATAR_GUIA;
-                }
-            };
-            if (respondeElJoven) {
-                delete avatarImg.dataset.proboRutaAlternativa;
-                avatarImg.src = AVATAR_RESPUESTA;
-            } else {
-                avatarImg.onerror = function () {
-                    this.onerror = null;
-                    this.src = @json(asset('build/img/avatars/cuerpo.webp'));
-                };
-                avatarImg.src = AVATAR_GUIA;
-            }
-            avatarImg.alt = respondeElJoven
-                ? 'Joven que responde con sinceridad'
-                : AVATAR_GUIA_NOMBRE + ' hablando';
-            avatarNombreEl.childNodes[0].textContent = respondeElJoven ? 'Joven' : AVATAR_GUIA_NOMBRE;
-            avatarSubtituloEl.textContent = respondeElJoven
-                ? 'Responde con sinceridad'
-                : 'Tu compañero te lo cuenta';
-
             chips.forEach((c, k) => {
                 c.classList.toggle('active', k === i);
                 c.setAttribute('aria-pressed', k === i ? 'true' : 'false');
@@ -1047,11 +1011,6 @@
                     setTimeout(() => { if (mio === token && secuencia) hablar(i + 1); }, 600);
                 } else {
                     secuencia = false;
-                    // En reproducción individual, al terminar la apertura aparece el joven.
-                    // El segundo audio queda esperando a que el usuario pulse "Escuchar este paso".
-                    if (i === 0 && PASOS[i + 1] && PASOS[i + 1].personaje === 'joven') {
-                        mostrar(i + 1);
-                    }
                 }
             };
 

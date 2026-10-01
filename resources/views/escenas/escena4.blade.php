@@ -131,7 +131,7 @@
             ],
         ],
         [
-            'texto' => 'En Colombia, ¿a qué línea llamar si tu hijo está en una crisis de consumo aguda?',
+            'texto' => 'En Colombia, ¿a qué línea llamar si tu hijo está en una crisis de consumo?',
             'opciones' => [
                 'Línea 123 (Policía).',
                 'Línea 106 de Salud Mental — gratuita 24/7.',

@@ -112,6 +112,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Entender por qué | Aprende</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -578,6 +579,7 @@
         const POS_SIGUIENTE = {{ $posSiguiente }};
         const POS_ACTUAL = {{ $porcentajeRecorrido }};
         const CLAVE_QUIZ = @json($claveQuiz);
+        const URL_AVANCE = @json(url('/avance-escena'));
         const NOMBRE_MEDALLA = @json($nombreMedalla);
         let yendo = false;
 
@@ -702,6 +704,27 @@
             actualizar();
         }
 
+        // Envía el resultado a la base de datos (el servidor solo guarda el primero de cada escena)
+        function enviarAvance() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            fetch(URL_AVANCE, {
+                method: 'POST',
+                credentials: 'same-origin',
+                keepalive: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': meta ? meta.content : ''
+                },
+                body: JSON.stringify({
+                    escena: ESCENA,
+                    aciertos: aciertos,
+                    total: tarjetas.length,
+                    respuestas: respuestasGuardadas
+                })
+            }).catch(() => { /* sin conexión: se reintenta al volver a abrir la escena */ });
+        }
+
         function finalizarCuestionario(restaurando) {
             const perfecto = aciertos === tarjetas.length;
             if (perfecto) xp += BONO;
@@ -714,6 +737,7 @@
 
             if (perfecto) medalChip.hidden = false;
             guardarProgreso();
+            enviarAvance();
 
             // Al volver a la página no se repite la celebración
             if (!restaurando) {

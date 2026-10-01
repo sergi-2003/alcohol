@@ -10,10 +10,10 @@ use App\Http\Controllers\TemaController;
 use App\Http\Controllers\ContenidoController;
 use App\Http\Controllers\AprendeController;
 use App\Http\Controllers\ParticipacionController;
-use App\Http\Controllers\EstadisticasController;
+use App\Http\Controllers\Admin\EstadisticasController;
 use App\Http\Controllers\GraduacionController;
 use App\Http\Controllers\Admin\IndicadoresController;
-
+use App\Http\Controllers\AvanceEscenaController;
 /*
 |--------------------------------------------------------------------------
 | Página principal
@@ -76,6 +76,9 @@ Route::get('/participacion', [
 Route::get('/aprende/graduacion', [GraduacionController::class, 'show'])
     ->name('aprende.graduacion');
 
+
+    Route::post('/avance-escena', [AvanceEscenaController::class, 'guardar'])
+    ->name('avance.escena');
 /*
 |--------------------------------------------------------------------------
 | CLIENTE / PARTICIPANTE

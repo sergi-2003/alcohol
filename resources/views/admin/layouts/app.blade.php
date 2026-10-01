@@ -723,7 +723,7 @@
                     </h1>
 
                     <p>
-                        Administración de MI DECISIÓN
+                        Administración de campaña:un sorbito hoy un problema mañana
                     </p>
 
                 </div>
