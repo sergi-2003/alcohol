@@ -13,6 +13,7 @@ use App\Http\Controllers\ParticipacionController;
 use App\Http\Controllers\Admin\EstadisticasController;
 use App\Http\Controllers\GraduacionController;
 use App\Http\Controllers\Admin\IndicadoresController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AvanceEscenaController;
 /*
 |--------------------------------------------------------------------------
@@ -76,9 +77,21 @@ Route::get('/participacion', [
 Route::get('/aprende/graduacion', [GraduacionController::class, 'show'])
     ->name('aprende.graduacion');
 
+Route::get('/aprende/graduacion/pdf', [GraduacionController::class, 'pdf'])
+    ->name('aprende.graduacion.pdf');
+    
+Route::post('/aprende/reporte-resultados', [GraduacionController::class, 'reporte'])
+    ->name('aprende.reporte.resultados');
 
+    
     Route::post('/avance-escena', [AvanceEscenaController::class, 'guardar'])
     ->name('avance.escena');
+Route::post('/respuestas-escena', [RespuestaEscenaController::class, 'guardar'])
+    ->name('respuestas.escena');
+
+Route::post('/aprende/reporte/resultados', [ReporteResultadosController::class, 'generar'])
+    ->name('aprende.reporte.resultados');
+    
 /*
 |--------------------------------------------------------------------------
 | CLIENTE / PARTICIPANTE
@@ -222,11 +235,10 @@ Route::get('/registro/google/callback', [
 |--------------------------------------------------------------------------
 */
 
-Route::get('/admin', function () {
-
-    return view('admin.dashboard');
-
-})->middleware('auth')->name('admin');
+Route::get('/admin', [
+    DashboardController::class,
+    'index'
+])->middleware('auth')->name('admin');
 
 Route::get('/media/contenidos/{filename}', function ($filename) {
 

@@ -471,15 +471,15 @@
     {{-- ============ GUION CON AVATAR (AUDIO) ============ --}}
     <section aria-labelledby="guion-title">
         <h2 class="section-title" id="guion-title"><i class="bi bi-mic"></i> Guion para la conversación difícil</h2>
-        <p class="section-sub">Adapte este modelo a su estilo. Escuche a {{ $avatarNombre }} decirlo en voz alta.</p>
+        <p class="section-sub">Adapta este modelo a tu estilo. Escucha a la Cuidadora decirlo en voz alta.</p>
 
         <div class="speaker" id="speaker">
             <div class="speaker-side">
                 <div class="speaker-img">
-                    <img src="{{ $avatarRuta }}" alt="{{ $avatarNombre }} hablando" onerror="this.onerror=null;this.src='{{ $avatarFallback }}'">
+                   <img src="{{ asset('build/img/avatars/cuidadora.webp') }}" alt="Avatar">
                 </div>
                 <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-                <div class="speaker-name">{{ $avatarNombre }}<small>Tu compañero te lo cuenta</small></div>
+                <div class="speaker-name">Cuidadora<small>Tu compañero te lo cuenta</small></div>
             </div>
 
             <div class="speaker-main">

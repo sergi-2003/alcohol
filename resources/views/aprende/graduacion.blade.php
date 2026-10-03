@@ -19,8 +19,34 @@
         .toolbar{max-width:1120px;margin:0 auto 18px;display:flex;gap:12px;justify-content:flex-end}
         .toolbar button,.toolbar a{border:0;border-radius:10px;padding:12px 18px;font-weight:800;text-decoration:none;cursor:pointer;font-size:14px}
         .btn-print{background:var(--gold);color:#263238}
+
+        .btn-share{background:var(--green);color:#fff}
+        .btn-platform{background:var(--blue);color:#fff}
+        .completion-badge{
+            width:max-content;
+            max-width:100%;
+            margin:24px auto 28px;
+            padding:10px 18px;
+            border-radius:12px;
+            background:var(--paper);
+            border:1px solid #d8eee6;
+            color:var(--green-dark);
+            font-weight:800;
+            text-align:center;
+        }
+        .share-message{
+            display:none;
+            max-width:1120px;
+            margin:0 auto 12px;
+            padding:10px 14px;
+            border-radius:9px;
+            background:#e1f6e9;
+            color:#176b3a;
+            font-size:13px;
+            font-weight:700;
+        }
         .btn-back{background:#fff;border:1px solid var(--line)!important;color:var(--blue)}
-        .certificate{position:relative;max-width:1120px;min-height:760px;margin:0 auto;background:#fff;border:8px solid var(--green-dark);outline:2px solid var(--gold);outline-offset:-17px;padding:34px 42px 30px;overflow:hidden;box-shadow:0 16px 44px #15276a18}
+        .certificate{position:relative;max-width:1120px;min-height:650px;margin:0 auto;background:#fff;border:8px solid var(--green-dark);outline:2px solid var(--gold);outline-offset:-17px;padding:30px 42px 26px;overflow:hidden;box-shadow:0 16px 44px #15276a18}
         .certificate:before,.certificate:after{content:"";position:absolute;width:190px;height:190px;border:22px solid #e8f6f3;border-radius:50%;z-index:0}
         .certificate:before{top:-115px;left:-100px}
         .certificate:after{right:-115px;bottom:-120px}
@@ -40,7 +66,7 @@
         .avatar-wrap img{width:100%;height:100%;object-fit:contain}
         .recipient-info{text-align:left}
         .recipient-label{font-size:11px;color:var(--muted)}
-        .recipient-name{font-family:"Nunito","Inter",sans-serif;font-size:27px;font-weight:900;color:var(--green-dark);margin:4px 0}
+        .recipient-name{font-family:"Nunito","Inter",sans-serif;font-size:29px;font-weight:900;color:var(--green-dark);margin:4px 0}
         .recipient-note{font-size:12px;color:var(--muted)}
         .statement{text-align:center;font-size:13px;line-height:1.55;max-width:770px;margin:0 auto 15px}
         .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
@@ -93,12 +119,30 @@
             .answer-card{padding:6px 8px}.answer-line{font-size:9px;margin-top:3px}
             .footer{margin-top:8px;padding-top:7px}
         }
+    
+        .btn-report{background:#eef4fa;color:#265784;border:1px solid #c9d8e7}
+        .btn-report:hover{background:#e3edf7}
     </style>
 </head>
 <body>
+    <div id="shareMessage" class="share-message"></div>
+
     <div class="toolbar">
-        <a class="btn-back" href="{{ url('/aprende') }}"><i class="bi bi-arrow-left"></i> Volver a Aprende</a>
-        <button class="btn-print" type="button" onclick="window.print()"><i class="bi bi-file-earmark-pdf-fill"></i> Generar / guardar PDF</button>
+        <a class="btn-back" href="{{ url('/aprende') }}">
+            <i class="bi bi-arrow-left"></i> Volver a Aprende
+        </a>
+        <button class="btn-share" type="button" onclick="compartirCertificado()">
+            <i class="bi bi-share-fill"></i> Compartir certificado
+        </button>
+        <button class="btn-platform" type="button" onclick="compartirPlataforma()">
+            <i class="bi bi-megaphone-fill"></i> Compartir plataforma
+        </button>
+        <button class="btn-report" type="button" onclick="descargarReporte()">
+            <i class="bi bi-clipboard-data-fill"></i> Descargar reporte
+        </button>
+        <button class="btn-print" type="button" onclick="window.print()">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Guardar PDF
+        </button>
     </div>
 
     <main class="certificate">
@@ -136,33 +180,15 @@
             </section>
 
             <p class="statement">
-                Participó en el recorrido <strong>“Un Sorbito Hoy, Un Problema Mañana”</strong>,
-                enfocado en reconocer riesgos, fortalecer el diálogo familiar y conocer recursos de prevención y apoyo.
-            </p>
-
-            <section class="stats" aria-label="Resumen de gamificación">
-                <div class="stat"><strong id="totalXp">—</strong><span>Puntos XP acumulados</span></div>
-                <div class="stat"><strong id="correctCount">—</strong><span>Respuestas correctas</span></div>
-                <div class="stat"><strong id="questionCount">—</strong><span>Preguntas respondidas</span></div>
-                <div class="stat"><strong id="accuracy">—</strong><span>Porcentaje de aciertos</span></div>
-            </section>
-
-            <div class="section-title"><i class="bi bi-person-vcard"></i> Datos del participante</div>
-            <section class="details">
-                <div class="detail"><span>Edad</span><strong>{{ $participante->edad ?: 'No registrada' }}</strong></div>
-                <div class="detail"><span>Institución</span><strong>{{ $participante->institucion ?: 'No registrada' }}</strong></div>
-                <div class="detail"><span>Grado</span><strong>{{ $participante->grado ?: 'No registrado' }}</strong></div>
-                <div class="detail"><span>Rol familiar</span><strong>{{ $participante->rol_familiar ?: 'No registrado' }}</strong></div>
-            </section>
-
-            <div class="section-title"><i class="bi bi-patch-question"></i> Registro de preguntas y respuestas</div>
-            <section id="answerRecords" class="answers-grid">
-                <div class="no-data">Preparando el registro de respuestas…</div>
-            </section>
+        Ha completado satisfactoriamente el recorrido
+        <strong>“Un Sorbito Hoy, Un Problema Mañana”</strong>,
+        orientado a la prevención, la reflexión y el fortalecimiento del diálogo familiar.
+    </p>
+            <div class="completion-badge"><i class="bi bi-check-circle-fill"></i> Recorrido educativo completado</div>
 
             <footer class="footer">
                 <div class="footer-note">
-                    Este certificado resume la participación y los resultados de gamificación registrados en este navegador.
+                    Este certificado acredita la participación en el programa educativo.
                     Código de referencia: {{ $codigoCertificado }}.
                 </div>
                 <div class="signature">
@@ -174,165 +200,481 @@
         </div>
     </main>
 
+
+
 <script>
-(() => {
     const participacionId = @json(session('participacion_id') ?: 'anon');
+    const shareMessage = document.getElementById('shareMessage');
 
-    // Preguntas de los niveles con cuestionario que ya están definidos en las vistas actuales.
-    // Las escenas 1 y 2 otorgan XP por completar la escena, pero no tienen quiz de preguntas.
-    const banco = [
-        {
-            nivel: 3,
-            preguntas: [
-                {
-                    texto: 'Tu hijo llega con los ojos rojos un sábado y dice que “solo comió mucho”. ¿Cuál es la primera acción recomendable?',
-                    opciones: [
-                        'Confrontarlo de inmediato y registrar su cuarto.',
-                        'Observar si se repite el patrón y preparar una conversación calmada.',
-                        'Ignorarlo — los adolescentes exageran.',
-                        'Castigarlo preventivamente.'
-                    ],
-                    correcta: 1
-                },
-                {
-                    texto: '¿Cuál combinación de señales debe generar mayor preocupación en un padre?',
-                    opciones: [
-                        'Cambios de humor + amigos nuevos.',
-                        'Consumo abierto + mentiras frecuentes + dinero desaparecido.',
-                        'Bajas en notas únicamente.',
-                        'Distanciamiento de la familia.'
-                    ],
-                    correcta: 1
-                }
-            ]
-        },
-        {
-            nivel: 4,
-            preguntas: [
-                {
-                    texto: 'Tu hijo de 14 años admite haber consumido marihuana 3 veces. ¿Cuál es la ruta correcta?',
-                    opciones: [
-                        'Internarlo de inmediato en un centro de rehabilitación.',
-                        'Hablar con calma, entender el contexto y buscar orientación si se repite.',
-                        'Probar la droga tú mismo para entender el efecto.',
-                        'Ignorarlo — probar una vez no es el fin del mundo.'
-                    ],
-                    correcta: 1
-                },
-                {
-                    texto: 'En Colombia, ¿a qué línea llamar si tu hijo está en una crisis de consumo aguda?',
-                    opciones: [
-                        'Línea 123 (Policía).',
-                        'Línea 106 de Salud Mental — gratuita 24/7.',
-                        'Línea 141 del ICBF.',
-                        'Esperar a que pase y hablar mañana.'
-                    ],
-                    correcta: 1
-                }
-            ]
-        }
-    ];
-
-    const registros = [];
-    let aciertos = 0;
-    let respondidas = 0;
-
-    banco.forEach(grupo => {
-        const clave = `pp_quiz_${participacionId}_${grupo.nivel}`;
-        let guardado = {};
-        try { guardado = JSON.parse(localStorage.getItem(clave) || '{}'); } catch (e) {}
-        const respuestas = guardado && guardado.respuestas && typeof guardado.respuestas === 'object'
-            ? guardado.respuestas : {};
-
-        grupo.preguntas.forEach((pregunta, indice) => {
-            if (!Object.prototype.hasOwnProperty.call(respuestas, indice)) return;
-
-            const elegida = Number(respuestas[indice]);
-            if (!Number.isInteger(elegida) || !pregunta.opciones[elegida]) return;
-
-            const correcta = elegida === pregunta.correcta;
-            respondidas++;
-            if (correcta) aciertos++;
-
-            registros.push({
-                nivel: grupo.nivel,
-                pregunta: pregunta.texto,
-                elegida: pregunta.opciones[elegida],
-                respuestaCorrecta: pregunta.opciones[pregunta.correcta],
-                correcta
-            });
-        });
-    });
-
-    const contenedor = document.getElementById('answerRecords');
-    contenedor.replaceChildren();
-
-    if (!registros.length) {
-        const aviso = document.createElement('div');
-        aviso.className = 'no-data';
-        aviso.textContent = 'No se encontraron respuestas de cuestionarios guardadas en este navegador. Verifica que estés usando el mismo navegador y perfil con el que realizaste las actividades.';
-        contenedor.appendChild(aviso);
-    } else {
-        registros.forEach((registro, i) => {
-            const tarjeta = document.createElement('article');
-            tarjeta.className = 'answer-card';
-
-            const cabecera = document.createElement('div');
-            cabecera.className = 'answer-head';
-
-            const titulo = document.createElement('strong');
-            titulo.textContent = `Nivel ${registro.nivel} · Pregunta ${i + 1}`;
-
-            const estado = document.createElement('span');
-            estado.className = 'badge ' + (registro.correcta ? 'ok' : 'bad');
-            estado.textContent = registro.correcta ? 'Correcta' : 'Por reforzar';
-
-            cabecera.append(titulo, estado);
-
-            const pregunta = document.createElement('div');
-            pregunta.className = 'answer-line';
-            const pq = document.createElement('b');
-            pq.textContent = 'Pregunta: ';
-            pregunta.append(pq, document.createTextNode(registro.pregunta));
-
-            const elegida = document.createElement('div');
-            elegida.className = 'answer-line';
-            const pe = document.createElement('b');
-            pe.textContent = 'Respuesta elegida: ';
-            elegida.append(pe, document.createTextNode(registro.elegida));
-
-            const correcta = document.createElement('div');
-            correcta.className = 'answer-line';
-            const pc = document.createElement('b');
-            pc.textContent = 'Respuesta correcta: ';
-            correcta.append(pc, document.createTextNode(registro.respuestaCorrecta));
-
-            tarjeta.append(cabecera, pregunta, elegida, correcta);
-            contenedor.appendChild(tarjeta);
-        });
+    function mostrarMensajeCompartir(mensaje) {
+        shareMessage.textContent = mensaje;
+        shareMessage.style.display = 'block';
+        setTimeout(() => shareMessage.style.display = 'none', 4500);
     }
 
-    let xpBase = 0;
-    try {
-        xpBase = Number(localStorage.getItem('pontePilasXP')
-            || localStorage.getItem('ponte_pilas_xp') || 0);
-    } catch (e) {}
+    async function compartirCertificado() {
+        const url = window.location.href;
+        const texto = 'He completado el recorrido educativo “Un Sorbito Hoy, Un Problema Mañana”. ¡Conoce la plataforma!';
 
-    let xpNivelesQuiz = 0;
-    try {
-        const progreso = JSON.parse(sessionStorage.getItem('pp_progreso') || '{}');
-        const niveles = progreso && progreso.niveles ? Object.values(progreso.niveles) : [];
-        xpNivelesQuiz = niveles.reduce((s, n) => s + Number(n && n.xp || 0), 0);
-    } catch (e) {}
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Mi certificado | Un Sorbito Hoy, Un Problema Mañana',
+                    text: texto,
+                    url: url
+                });
+                return;
+            } catch (error) {
+                if (error && error.name === 'AbortError') return;
+            }
+        }
 
-    const xpTotal = Math.max(0, xpBase + xpNivelesQuiz);
-    const porcentaje = respondidas ? Math.round((aciertos / respondidas) * 100) : 0;
+        try {
+            await navigator.clipboard.writeText(url);
+            mostrarMensajeCompartir('Enlace del certificado copiado. Ya puedes compartirlo en tus redes sociales.');
+        } catch (error) {
+            window.open(
+                'https://wa.me/?text=' + encodeURIComponent(texto + ' ' + url),
+                '_blank',
+                'noopener,noreferrer'
+            );
+        }
+    }
 
-    document.getElementById('totalXp').textContent = xpTotal + ' XP';
-    document.getElementById('correctCount').textContent = aciertos;
-    document.getElementById('questionCount').textContent = respondidas;
-    document.getElementById('accuracy').textContent = porcentaje + '%';
-})();
+    async function descargarReporte() {
+        try {
+            mostrarMensajeCompartir('Preparando el reporte de respuestas...');
+
+            const registros = obtenerRegistrosReporte();
+
+            if (!registros.length) {
+                mostrarMensajeCompartir('No se encontraron respuestas guardadas para generar el reporte.');
+                return;
+            }
+
+            const respuesta = await fetch(@json(route('aprende.reporte.resultados')), {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/pdf',
+                    'X-CSRF-TOKEN': @json(csrf_token())
+                },
+                body: JSON.stringify({ registros })
+            });
+
+            if (!respuesta.ok) {
+                let mensaje = 'No se pudo generar el reporte.';
+                try {
+                    const error = await respuesta.json();
+                    if (error.mensaje) mensaje = error.mensaje;
+                } catch (e) {}
+                throw new Error(mensaje);
+            }
+
+            const blob = await respuesta.blob();
+            const url = URL.createObjectURL(blob);
+            const enlace = document.createElement('a');
+            enlace.href = url;
+            enlace.download = 'Reporte-resultados-Un-Sorbito-Hoy-Un-Problema-Manana.pdf';
+            document.body.appendChild(enlace);
+            enlace.click();
+            enlace.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+            mostrarMensajeCompartir('Reporte descargado correctamente.');
+        } catch (error) {
+            mostrarMensajeCompartir(error.message || 'No se pudo generar el reporte.');
+        }
+    }
+
+    function obtenerRegistrosReporte() {
+
+    const registros = [];
+
+    /*
+    |--------------------------------------------------------------------------
+    | PARTICIPACIÓN ACTUAL
+    |--------------------------------------------------------------------------
+    */
+
+    const participacionId =
+        @json(session('participacion_id') ?: 'anon');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | BANCO COMPLETO DE PREGUNTAS
+    |--------------------------------------------------------------------------
+    */
+
+    const banco = {
+
+        1: [
+            {
+                texto: 'Tu hijo llega con los ojos rojos un sábado y dice que “solo comió mucho”. ¿Cuál es la primera acción recomendable?',
+                opciones: [
+                    'Confrontarlo de inmediato y registrar su cuarto.',
+                    'Observar si se repite el patrón y preparar una conversación calmada.',
+                    'Ignorarlo — los adolescentes exageran.',
+                    'Castigarlo preventivamente.'
+                ],
+                correcta: 1
+            },
+
+            {
+                texto: '¿Cuál combinación de señales debe generar mayor preocupación en un padre?',
+                opciones: [
+                    'Cambios de humor + amigos nuevos.',
+                    'Consumo abierto + mentiras frecuentes + dinero desaparecido.',
+                    'Bajas en notas únicamente.',
+                    'Distanciamiento de la familia.'
+                ],
+                correcta: 1
+            }
+        ],
+
+
+        2: [
+            {
+                texto: '¿Cuál es el factor de riesgo individual más fuerte para el inicio del consumo en Colombia?',
+                opciones: [
+                    'Tener bajas calificaciones académicas.',
+                    'Vacíos emocionales como ansiedad, soledad o baja autoestima.',
+                    'No tener dinero para consumir.',
+                    'Vivir en una ciudad grande.'
+                ],
+                correcta: 1
+            },
+
+            {
+                texto: '¿Por qué el cerebro adolescente evalúa el riesgo diferente al adulto?',
+                opciones: [
+                    'Porque son naturalmente rebeldes por actitud.',
+                    'Porque el lóbulo prefrontal (juicio y autocontrol) no madura hasta los 25 años.',
+                    'Porque tienen menor inteligencia.',
+                    'Porque producen más hormonas.'
+                ],
+                correcta: 1
+            }
+        ],
+
+
+        3: [
+            {
+                texto: 'Tu hija de 16 años llega a las 2am con olor a alcohol. ¿Qué haces primero?',
+                opciones: [
+                    'Confrontarla inmediatamente y quitarle el celular.',
+                    'Verificar que está bien, dejarla dormir y hablar mañana con calma.',
+                    'Ignorarlo — casi es adulta.',
+                    'Llamar al colegio al día siguiente para reportarlo.'
+                ],
+                correcta: 1
+            },
+
+            {
+                texto: '¿Cuál frase abre mejor la conversación sobre consumo con tu hijo?',
+                opciones: [
+                    '“¿Estás consumiendo drogas? Necesito que me digas la verdad ya.”',
+                    '“Tu primo nunca hizo esto — ¿por qué tú sí?”',
+                    '“¿Cómo son las fiestas a las que vas? ¿Qué suele pasar ahí?”',
+                    '“Si te vuelvo a encontrar tomando, te quedas sin salidas dos meses.”'
+                ],
+                correcta: 2
+            }
+        ],
+
+
+        4: [
+            {
+                texto: 'Tu hijo de 14 años admite haber consumido marihuana 3 veces. ¿Cuál es la ruta correcta?',
+                opciones: [
+                    'Internarlo de inmediato en un centro de rehabilitación.',
+                    'Hablar con calma, entender el contexto y buscar orientación si se repite.',
+                    'Probar la droga tú mismo para entender el efecto.',
+                    'Ignorarlo — probar una vez no es el fin del mundo.'
+                ],
+                correcta: 1
+            },
+
+            {
+                texto: 'En Colombia, ¿a qué línea llamar si tu hijo está en una crisis de consumo?',
+                opciones: [
+                    'Línea 123 (Policía).',
+                    'Línea 106 de Salud Mental — gratuita 24/7.',
+                    'Línea 141 del ICBF.',
+                    'Esperar a que pase y hablar mañana.'
+                ],
+                correcta: 1
+            }
+        ]
+
+    };
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | LEER RESPUESTAS GUARDADAS
+    |--------------------------------------------------------------------------
+    |
+    | Tus escenas utilizan:
+    |
+    | pp_quiz_{participacionId}_{nivel}
+    |
+    | Ejemplo:
+    |
+    | pp_quiz_23_1
+    | pp_quiz_23_2
+    | pp_quiz_23_3
+    | pp_quiz_23_4
+    |
+    |--------------------------------------------------------------------------
+    */
+
+    Object.keys(banco).forEach(function(nivel) {
+
+        const clave =
+            `pp_quiz_${participacionId}_${nivel}`;
+
+
+        let guardado = {};
+
+        try {
+
+            const contenido =
+                localStorage.getItem(clave);
+
+            if (contenido) {
+                guardado = JSON.parse(contenido);
+            }
+
+        } catch (error) {
+
+            console.error(
+                'Error leyendo:',
+                clave,
+                error
+            );
+
+            guardado = {};
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPUESTAS
+        |--------------------------------------------------------------------------
+        */
+
+        const respuestas =
+            guardado &&
+            guardado.respuestas &&
+            typeof guardado.respuestas === 'object'
+                ? guardado.respuestas
+                : {};
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RECORRER LAS 2 PREGUNTAS DEL NIVEL
+        |--------------------------------------------------------------------------
+        */
+
+        banco[nivel].forEach(function(pregunta, indice) {
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ¿EXISTE UNA RESPUESTA?
+            |--------------------------------------------------------------------------
+            */
+
+            const tieneRespuesta =
+                Object.prototype.hasOwnProperty.call(
+                    respuestas,
+                    indice
+                );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | SI NO RESPONDIÓ
+            |--------------------------------------------------------------------------
+            */
+
+            if (!tieneRespuesta) {
+
+                registros.push({
+
+                    nivel: Number(nivel),
+
+                    pregunta:
+                        pregunta.texto,
+
+                    elegida:
+                        'No respondida',
+
+                    respuestaCorrecta:
+                        pregunta.opciones[
+                            pregunta.correcta
+                        ],
+
+                    correcta:
+                        false,
+
+                    respondida:
+                        false
+
+                });
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | OBTENER ÍNDICE DE LA RESPUESTA
+            |--------------------------------------------------------------------------
+            */
+
+            const elegida =
+                Number(respuestas[indice]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDAR RESPUESTA
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                !Number.isInteger(elegida) ||
+                !pregunta.opciones[elegida]
+            ) {
+
+                registros.push({
+
+                    nivel: Number(nivel),
+
+                    pregunta:
+                        pregunta.texto,
+
+                    elegida:
+                        'No respondida',
+
+                    respuestaCorrecta:
+                        pregunta.opciones[
+                            pregunta.correcta
+                        ],
+
+                    correcta:
+                        false,
+
+                    respondida:
+                        false
+
+                });
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | DETERMINAR SI ES CORRECTA
+            |--------------------------------------------------------------------------
+            */
+
+            const esCorrecta =
+                elegida === pregunta.correcta;
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | GUARDAR REGISTRO
+            |--------------------------------------------------------------------------
+            */
+
+            registros.push({
+
+                nivel:
+                    Number(nivel),
+
+                pregunta:
+                    pregunta.texto,
+
+                elegida:
+                    pregunta.opciones[elegida],
+
+                respuestaCorrecta:
+                    pregunta.opciones[
+                        pregunta.correcta
+                    ],
+
+                correcta:
+                    esCorrecta,
+
+                respondida:
+                    true
+
+            });
+
+        });
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESULTADO FINAL
+    |--------------------------------------------------------------------------
+    |
+    | Siempre devuelve las 8 preguntas.
+    |--------------------------------------------------------------------------
+    */
+
+    console.log(
+        'Participación:',
+        participacionId
+    );
+
+    console.log(
+        'Registros encontrados:',
+        registros
+    );
+
+    return registros;
+}
+    async function compartirPlataforma() {
+        const url = @json(url('/aprende'));
+        const texto = 'Conoce “Un Sorbito Hoy, Un Problema Mañana”, una plataforma educativa de prevención y reflexión.';
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Un Sorbito Hoy, Un Problema Mañana',
+                    text: texto,
+                    url: url
+                });
+                return;
+            } catch (error) {
+                if (error && error.name === 'AbortError') return;
+            }
+        }
+
+        try {
+            await navigator.clipboard.writeText(url);
+            mostrarMensajeCompartir('Enlace de la plataforma copiado. Ya puedes compartirlo con otras personas.');
+        } catch (error) {
+            window.open(
+                'https://wa.me/?text=' + encodeURIComponent(texto + ' ' + url),
+                '_blank',
+                'noopener,noreferrer'
+            );
+        }
+    }
 </script>
+
 </body>
 </html>

@@ -113,6 +113,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reconocer señales | Aprende</title>
 
@@ -378,14 +379,14 @@
     {{-- ============ ENCABEZADO ============ --}}
     <div class="tag"><i class="bi bi-search"></i> Nivel 1 · Reconocer señales</div>
     <h1>¿Cómo saber si mi hijo/a está consumiendo?</h1>
-    <p class="lead">En Colombia, la edad de inicio de consumo de alcohol es de 12 años en promedio. Las señales no siempre son obvias — aprenderlas es el primer paso.</p>
+    <p class="lead">En Armenia, la edad de inicio de consumo de alcohol es de 12 años en promedio. Las señales no siempre son obvias — aprenderlas es el primer paso.</p>
 
     {{-- ============ DATO ============ --}}
     <section class="stat" aria-label="Dato informativo">
-        <div class="stat-num">34%</div>
+        <div class="stat-num">27.5%</div>
         <div>
             <h3>Dato Armenia 2022</h3>
-            <p>En el Quindío, el 27,5 % de los estudiantes ha consumido alcohol. La edad de inicio se encuentra alrededor de los 13 años, por lo que la prevención y el acompañamiento familiar son fundamentales desde edades tempranas. el alcohol puede convertirse en una de las primeras sustancias exploradas durante la adolescencia. La sustancia exploratoria es aquella que un adolescente prueba por curiosidad, presión de grupo o deseo de experimentar. Prevenir también significa acompañar ese primer acercamiento y hablar a tiempo.</p>
+            <p>En Armenia, el 27,5 % de los estudiantes ha consumido alcohol. La edad de inicio se encuentra alrededor de los 13 años, por lo que la prevención y el acompañamiento familiar son fundamentales desde edades tempranas. el alcohol puede convertirse en una de las primeras sustancias exploradas durante la adolescencia. La sustancia exploratoria es aquella que un adolescente prueba por curiosidad, presión de grupo o deseo de experimentar. Prevenir también significa acompañar ese primer acercamiento y hablar a tiempo.</p>
         </div>
     </section>
 
@@ -595,6 +596,55 @@
             } catch (e) { /* almacenamiento no disponible */ }
         }
 
+
+        async function guardarProgresoBD() {
+            const respuestas = {};
+
+            tarjetas.forEach((tarjeta, indice) => {
+                const respuesta = respuestasGuardadas[indice];
+
+                if (respuesta !== undefined) {
+                    respuestas[indice] = respuesta;
+                }
+            });
+
+            try {
+                const respuesta = await fetch(
+                    @json(route('avance.escena')),
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document
+                                .querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            escena: ESCENA,
+                            aciertos: aciertos,
+                            total: tarjetas.length,
+                            respuestas: respuestas
+                        })
+                    }
+                );
+
+                const data = await respuesta.json();
+
+                if (!respuesta.ok || !data.ok) {
+                    console.error('Error guardando avance:', data);
+                    return false;
+                }
+
+                console.log('Avance guardado correctamente:', data);
+                return true;
+
+            } catch (error) {
+                console.error('Error de conexión con el servidor:', error);
+                return false;
+            }
+        }
+
         function confeti() {
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
             const caja = document.getElementById('confetti');
@@ -740,7 +790,7 @@
             if (respondidas === tarjetas.length) finalizarCuestionario(true);
         }
 
-        window.completarEscena = function () {
+        window.completarEscena = async function () {
             if (respondidas < tarjetas.length) {
                 const pendiente = tarjetas.find(t => t.dataset.answered !== 'true');
                 quizHint.hidden = false;
@@ -760,8 +810,38 @@
             modalNext.disabled = true;
 
             guardarProgreso();
+
+            const guardadoBD = await guardarProgresoBD();
+
+            if (!guardadoBD) {
+                yendo = false;
+
+                const boton = document.getElementById('btnCompletar');
+
+                boton.disabled = false;
+
+                boton.innerHTML =
+                    '{{ $hayNivelSiguiente
+                        ? "Continuar al Nivel " . ($escenaActual + 1)
+                        : "Finalizar recorrido" }} <i class="bi bi-arrow-right"></i>';
+
+                modalNext.disabled = false;
+
+                alert(
+                    'No fue posible guardar tu progreso. Verifica tu conexión e inténtalo nuevamente.'
+                );
+
+                return;
+            }
+
             window.dispatchEvent(new CustomEvent('escena:completada', {
-                detail: { escena: ESCENA, xp: xp, aciertos: aciertos, medalla: aciertos === tarjetas.length, quizCompletado: true }
+                detail: {
+                    escena: ESCENA,
+                    xp: xp,
+                    aciertos: aciertos,
+                    medalla: aciertos === tarjetas.length,
+                    quizCompletado: true
+                }
             }));
 
             // El avatar avanza al siguiente punto de la barra antes de cambiar de página
