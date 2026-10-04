@@ -17,6 +17,62 @@
     .welcome-meta { margin-top:18px; display:flex; flex-wrap:wrap; gap:10px; }
     .welcome-pill { padding:7px 12px; border:1px solid rgba(255,255,255,.20); border-radius:999px; background:rgba(255,255,255,.10); font-size:13px; }
 
+    .entry-summary {
+        display:grid;
+        grid-template-columns:1.4fr repeat(4,minmax(0,1fr));
+        gap:14px;
+        align-items:stretch;
+    }
+    .entry-main {
+        padding:22px;
+        border-radius:18px;
+        background:linear-gradient(135deg,#f7fbff 0%,#ffffff 100%);
+        border:1px solid #dbe8f6;
+    }
+    .entry-main .eyebrow {
+        color:#1565c0;
+        font-size:11px;
+        font-weight:800;
+        text-transform:uppercase;
+        letter-spacing:.08em;
+        margin-bottom:7px;
+    }
+    .entry-main h3 { margin:0 0 6px; color:#172033; font-size:20px; }
+    .entry-main p { margin:0; color:#64748b; font-size:13px; line-height:1.55; }
+    .entry-main strong { color:#1565c0; }
+    .entry-kpi {
+        background:#fff;
+        border:1px solid #e7edf5;
+        border-radius:16px;
+        padding:16px;
+        box-shadow:0 5px 18px rgba(30,41,59,.04);
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+    }
+    .entry-kpi-label { color:#64748b; font-size:11px; font-weight:700; }
+    .entry-kpi-value { margin-top:5px; color:#172033; font-size:24px; font-weight:850; }
+    .entry-kpi-note { margin-top:4px; color:#94a3b8; font-size:10px; }
+    .entry-status {
+        margin-top:14px;
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+    }
+    .entry-status span {
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:6px 9px;
+        border-radius:999px;
+        background:#f1f6fc;
+        color:#475569;
+        font-size:11px;
+        font-weight:700;
+    }
+    @media(max-width:1100px){ .entry-summary{grid-template-columns:1fr 1fr 1fr;} .entry-main{grid-column:1/-1;} }
+    @media(max-width:650px){ .entry-summary{grid-template-columns:1fr;} .entry-main{grid-column:auto;} }
+
     .section-title { display:flex; justify-content:space-between; align-items:center; gap:15px; margin-bottom:13px; }
     .section-title h3 { margin:0; font-size:18px; color:#172033; font-weight:800; }
     .section-title span { color:#718096; font-size:13px; }
@@ -79,6 +135,55 @@
 
     <section>
         <div class="section-title">
+            <h3>Resumen de entrada</h3>
+            <span>Vista rápida del estado actual de la plataforma</span>
+        </div>
+
+        <div class="entry-summary">
+            <div class="entry-main">
+                <div class="eyebrow">Estado de la plataforma</div>
+                <h3>Todo en un solo vistazo</h3>
+                <p>
+                    Actualmente hay <strong>{{ number_format($stats['participantes']) }}</strong>
+                    participantes registrados y un progreso promedio de
+                    <strong>{{ $stats['progreso_promedio'] }}%</strong>.
+                    Desde aquí puedes revisar participación, aprendizaje y actividad reciente.
+                </p>
+                <div class="entry-status">
+                    <span><i class="fa-solid fa-user-check"></i> {{ number_format($stats['participantes_identificados']) }} identificados</span>
+                    <span><i class="fa-solid fa-user-secret"></i> {{ number_format($stats['participantes_anonimos']) }} anónimos</span>
+                    <span><i class="fa-solid fa-medal"></i> {{ number_format($stats['medallas_escenas'] ?? 0) }} medallas</span>
+                </div>
+            </div>
+
+            <div class="entry-kpi">
+                <div class="entry-kpi-label">Participantes</div>
+                <div class="entry-kpi-value">{{ number_format($stats['participantes']) }}</div>
+                <div class="entry-kpi-note">Registros acumulados</div>
+            </div>
+
+            <div class="entry-kpi">
+                <div class="entry-kpi-label">Contenido activo</div>
+                <div class="entry-kpi-value">{{ number_format($stats['contenidos']) }}</div>
+                <div class="entry-kpi-note">Material disponible</div>
+            </div>
+
+            <div class="entry-kpi">
+                <div class="entry-kpi-label">Progreso promedio</div>
+                <div class="entry-kpi-value">{{ $stats['progreso_promedio'] }}%</div>
+                <div class="entry-kpi-note">Avance registrado</div>
+            </div>
+
+            <div class="entry-kpi">
+                <div class="entry-kpi-label">Certificados</div>
+                <div class="entry-kpi-value">{{ number_format($stats['certificados']) }}</div>
+                <div class="entry-kpi-note">Emitidos</div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-title">
             <h3>Resumen general</h3>
             <span>Datos consultados directamente de la base de datos</span>
         </div>
@@ -95,7 +200,7 @@
         </div>
     </section>
 
-    <div class="grid-2">
+    <!--<div class="grid-2">
         <div class="panel">
             <div class="section-title"><h3>Progreso por tema</h3><span>Promedio de avance</span></div>
             @forelse($progresoTemas as $tema)
@@ -106,13 +211,13 @@
             @empty
                 <div class="empty">Todavía no hay registros de progreso.</div>
             @endforelse
-        </div>
+        </div> --->
 
         <div class="panel">
             <div class="section-title"><h3>Participación</h3><span>Distribución actual</span></div>
             <div class="progress-row"><div class="progress-head"><span>Identificados</span><span>{{ $stats['participantes'] ? round($stats['participantes_identificados'] / $stats['participantes'] * 100, 1) : 0 }}%</span></div><div class="bar"><span style="width:{{ $stats['participantes'] ? ($stats['participantes_identificados'] / $stats['participantes'] * 100) : 0 }}%"></span></div></div>
             <div class="progress-row"><div class="progress-head"><span>Anónimos</span><span>{{ $stats['participantes'] ? round($stats['participantes_anonimos'] / $stats['participantes'] * 100, 1) : 0 }}%</span></div><div class="bar"><span style="width:{{ $stats['participantes'] ? ($stats['participantes_anonimos'] / $stats['participantes'] * 100) : 0 }}%"></span></div></div>
-            <div class="progress-row"><div class="progress-head"><span>Progreso promedio</span><span>{{ $stats['progreso_promedio'] }}%</span></div><div class="bar"><span style="width:{{ min(100, max(0, $stats['progreso_promedio'])) }}%"></span></div></div>
+            <!--<div class="progress-row"><div class="progress-head"><span>Progreso promedio</span><span>{{ $stats['progreso_promedio'] }}%</span></div><div class="bar"><span style="width:{{ min(100, max(0, $stats['progreso_promedio'])) }}%"></span></div></div>-->
         </div>
     </div>
 

@@ -273,6 +273,10 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
 .coordinate{padding:10px 14px;background:#fff;border:1px solid var(--linea);border-radius:10px}
 .coordinate span{display:block;font-size:14px;color:var(--suave)}
 .coordinate strong{font-size:16px}
+.accuracy-status{display:none;margin-top:12px;padding:11px 14px;border-radius:10px;font-size:14px;font-weight:600;background:#fff;border:1px solid var(--linea);color:var(--suave)}
+.accuracy-status.ok{display:block;border-left:4px solid var(--verde)}
+.accuracy-status.warn{display:block;border-left:4px solid #d99a00}
+.accuracy-status.error{display:block;border-left:4px solid #c0392b}
 .privacy-box{display:flex;gap:14px;margin-top:20px;padding:16px 18px;background:#fff;border-left:4px solid var(--verde);border-radius:0 10px 10px 0}
 .privacy-box i{font-size:22px;color:var(--verde)}
 .privacy-box p{font-size:16px;color:var(--suave)}
@@ -1273,11 +1277,13 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
     <input type="hidden" id="latitud" name="latitud" value="{{ old('latitud') }}">
     <input type="hidden" id="longitud" name="longitud" value="{{ old('longitud') }}">
     <input type="hidden" id="ubicacion_metodo" name="ubicacion_metodo" value="{{ old('ubicacion_metodo') }}">
+    <input type="hidden" id="precision_ubicacion" name="precision_ubicacion" value="{{ old('precision_ubicacion') }}">
 
     <div id="coordinatesContainer" class="coordinates" style="display:none;">
       <div class="coordinate"><span>Latitud</span><strong id="latitudVisual">—</strong></div>
       <div class="coordinate"><span>Longitud</span><strong id="longitudVisual">—</strong></div>
     </div>
+    <div id="accuracyStatus" class="accuracy-status" aria-live="polite"></div>
 
     <div class="location-actions">
       <button type="button" id="btnDetectarUbicacion" class="location-btn primary"><i class="bi bi-crosshair"></i> Detectar mi ubicación</button>
@@ -1572,41 +1578,201 @@ async function obtenerMunicipio(lat, lng) {
   } catch (e) { console.error('Error de geocodificación:', e); return ''; }
 }
 
+let watchIdUbicacion = null;
+let mejorPrecisionUbicacion = Infinity;
+let mejorPosicionUbicacion = null;
+let temporizadorUbicacion = null;
+
+const PRECISION_OBJETIVO = 50;  // metros: excelente precisión
+const PRECISION_MAXIMA = 500;   // metros: máximo permitido para una ubicación próxima
+const TIEMPO_MAXIMO_UBICACION = 60000; // 60 segundos para intentar mejorar la lectura
+
+function mostrarPrecision(accuracy) {
+  const accuracyStatus = $('accuracyStatus');
+  const metros = Math.round(Number(accuracy));
+
+  accuracyStatus.className = 'accuracy-status';
+
+  if (metros <= PRECISION_OBJETIVO) {
+    accuracyStatus.classList.add('ok');
+    accuracyStatus.textContent = '✓ Ubicación precisa. Precisión aproximada: ' + metros + ' metros.';
+  } else if (metros <= PRECISION_MAXIMA) {
+    accuracyStatus.classList.add('warn');
+    accuracyStatus.textContent = '⚠ Ubicación próxima. Precisión aproximada: ' + metros + ' metros (máximo permitido: 500 metros).';
+  } else {
+    accuracyStatus.classList.add('error');
+    accuracyStatus.textContent = 'La ubicación es demasiado aproximada (' + metros + ' metros). Active la ubicación precisa e inténtelo nuevamente.';
+  }
+}
+
+function detenerSeguimientoUbicacion() {
+  if (watchIdUbicacion !== null) {
+    navigator.geolocation.clearWatch(watchIdUbicacion);
+    watchIdUbicacion = null;
+  }
+  if (temporizadorUbicacion !== null) {
+    clearTimeout(temporizadorUbicacion);
+    temporizadorUbicacion = null;
+  }
+}
+
 async function procesarUbicacion(pos) {
-  const lat = pos.coords.latitude, lng = pos.coords.longitude;
-  latitudInput.value = lat.toFixed(7);
-  longitudInput.value = lng.toFixed(7);
+  const lat = Number(pos.coords.latitude);
+  const lng = Number(pos.coords.longitude);
+  const accuracy = Number(pos.coords.accuracy);
+
+  console.log('[Ponte Pilas] Latitud:', lat);
+  console.log('[Ponte Pilas] Longitud:', lng);
+  console.log('[Ponte Pilas] Precisión:', accuracy, 'metros');
+
+  // Conservamos la mejor lectura recibida durante el intento.
+  if (accuracy < mejorPrecisionUbicacion) {
+    mejorPrecisionUbicacion = accuracy;
+    mejorPosicionUbicacion = pos;
+    mostrarPrecision(accuracy);
+
+    const metros = Math.round(accuracy);
+    const accuracyStatus = $('accuracyStatus');
+
+    if (accuracy > PRECISION_OBJETIVO && accuracy <= PRECISION_MAXIMA) {
+      accuracyStatus.className = 'accuracy-status warn';
+      accuracyStatus.textContent = 'Mejor lectura: aproximadamente ' + metros + ' metros. Continuamos buscando una ubicación más cercana...';
+    } else if (accuracy > PRECISION_MAXIMA) {
+      accuracyStatus.className = 'accuracy-status warn';
+      accuracyStatus.textContent = 'Lectura actual: aproximadamente ' + metros + ' metros. Continuamos buscando una ubicación dentro del área máxima de 500 metros...';
+    }
+  }
+
+  // Si ya tenemos una lectura excelente, la usamos inmediatamente.
+  if (accuracy <= PRECISION_OBJETIVO) {
+    detenerSeguimientoUbicacion();
+    await guardarPosicionPrecisa(pos);
+  }
+}
+
+async function guardarPosicionPrecisa(pos) {
+  const lat = Number(pos.coords.latitude);
+  const lng = Number(pos.coords.longitude);
+  const accuracy = Number(pos.coords.accuracy);
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(accuracy)) {
+    manejarErrorUbicacion({ message: 'El navegador no entregó coordenadas válidas.' });
+    return;
+  }
+
+  if (accuracy > PRECISION_MAXIMA) {
+    metodoInput.value = 'manual';
+    latitudInput.value = '';
+    longitudInput.value = '';
+    $('precision_ubicacion').value = '';
+    coordinatesContainer.style.display = 'none';
+    mostrarPrecision(accuracy);
+    mostrarEstado('manual');
+    locationManual.querySelector('span')?.replaceChildren(
+      document.createTextNode('La ubicación obtenida supera el área máxima permitida de 500 metros. Active la ubicación precisa o ingrésela manualmente.')
+    );
+    return;
+  }
+
+  latitudInput.value = String(lat);
+  longitudInput.value = String(lng);
+  $('precision_ubicacion').value = String(accuracy);
   metodoInput.value = 'gps';
-  $('latitudVisual').textContent = lat.toFixed(6);
-  $('longitudVisual').textContent = lng.toFixed(6);
+
+  $('latitudVisual').textContent = lat.toFixed(7);
+  $('longitudVisual').textContent = lng.toFixed(7);
   coordinatesContainer.style.display = 'grid';
+  mostrarPrecision(accuracy);
+
   municipioInput.placeholder = 'Identificando municipio...';
   const municipio = await obtenerMunicipio(lat, lng);
+
+  mostrarEstado('detectado');
   if (municipio) {
-    mostrarEstado('detectado');
-    locationDetectedText.textContent = 'Ubicación detectada en ' + municipio + '. Puede revisar y ajustar la información si es necesario.';
+    locationDetectedText.textContent =
+      'Ubicación detectada en ' + municipio + '. Precisión aproximada: ' +
+      Math.round(accuracy) + ' metros.';
   } else {
-    mostrarEstado('detectado');
-    locationDetectedText.textContent = 'Coordenadas obtenidas correctamente. Verifique el municipio.';
+    locationDetectedText.textContent =
+      'Coordenadas obtenidas correctamente. Precisión aproximada: ' +
+      Math.round(accuracy) + ' metros.';
     municipioInput.placeholder = 'Escriba su municipio';
   }
 }
 
+function finalizarIntentoUbicacion() {
+  detenerSeguimientoUbicacion();
+
+  if (mejorPosicionUbicacion && mejorPrecisionUbicacion <= PRECISION_MAXIMA) {
+    guardarPosicionPrecisa(mejorPosicionUbicacion);
+    return;
+  }
+
+  const precision = Number.isFinite(mejorPrecisionUbicacion)
+    ? Math.round(mejorPrecisionUbicacion)
+    : null;
+
+  metodoInput.value = 'manual';
+  latitudInput.value = '';
+  longitudInput.value = '';
+  $('precision_ubicacion').value = '';
+  coordinatesContainer.style.display = 'none';
+  mostrarEstado('manual');
+
+  const accuracyStatus = $('accuracyStatus');
+  accuracyStatus.className = 'accuracy-status error';
+  accuracyStatus.textContent = precision
+    ? 'No se obtuvo una ubicación dentro del área máxima de 500 metros después de intentar durante 60 segundos. La mejor lectura fue de aproximadamente ' + precision + ' metros. Active la ubicación precisa y vuelva a intentarlo.'
+    : 'No fue posible obtener una ubicación dentro del área máxima de 500 metros. Verifique los permisos de ubicación e inténtelo nuevamente.';
+}
+
 function manejarErrorUbicacion(error) {
+  detenerSeguimientoUbicacion();
   console.warn('No fue posible obtener la ubicación:', error);
   metodoInput.value = 'manual';
+  latitudInput.value = '';
+  longitudInput.value = '';
+  $('precision_ubicacion').value = '';
   municipioInput.placeholder = 'Escriba su municipio';
   municipioInput.disabled = false;
   zonaInput.disabled = false;
   coordinatesContainer.style.display = 'none';
   mostrarEstado('manual');
+
+  const accuracyStatus = $('accuracyStatus');
+  accuracyStatus.className = 'accuracy-status error';
+  accuracyStatus.textContent = 'No fue posible obtener una ubicación precisa. Verifique los permisos de ubicación e inténtelo nuevamente.';
 }
 
 function detectarUbicacion() {
-  if (!navigator.geolocation) { manejarErrorUbicacion(); return; }
+  if (!navigator.geolocation) {
+    manejarErrorUbicacion({ message: 'Geolocalización no disponible.' });
+    return;
+  }
+
+  detenerSeguimientoUbicacion();
+  mejorPrecisionUbicacion = Infinity;
+  mejorPosicionUbicacion = null;
   mostrarEstado('carga');
-  navigator.geolocation.getCurrentPosition(procesarUbicacion, manejarErrorUbicacion,
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 });
+
+  const accuracyStatus = $('accuracyStatus');
+  accuracyStatus.className = 'accuracy-status warn';
+  accuracyStatus.textContent = 'Buscando la ubicación más precisa disponible...';
+
+  const opciones = {
+    enableHighAccuracy: true,
+    timeout: TIEMPO_MAXIMO_UBICACION,
+    maximumAge: 0
+  };
+
+  // watchPosition permite que el dispositivo mejore la lectura en lugar de aceptar inmediatamente una ubicación aproximada.
+  watchIdUbicacion = navigator.geolocation.watchPosition(
+    procesarUbicacion,
+    manejarErrorUbicacion,
+    opciones
+  );
+
+  temporizadorUbicacion = setTimeout(finalizarIntentoUbicacion, TIEMPO_MAXIMO_UBICACION);
 }
 
 /* Modal y comportamiento de participación sin datos de identificación */
@@ -1704,6 +1870,17 @@ document.addEventListener('keydown', e => {
 
 /* Validación */
 $('participacionForm').addEventListener('submit', function (event) {
+  const metodo = metodoInput.value;
+  const precision = Number($('precision_ubicacion').value);
+
+  if (metodo === 'gps') {
+    if (!latitudInput.value || !longitudInput.value || !Number.isFinite(precision) || precision > PRECISION_MAXIMA) {
+      event.preventDefault();
+      alert('La ubicación GPS debe estar dentro de un área máxima de 500 metros. Active la ubicación precisa y vuelva a detectarla, o ingrese la ubicación manualmente.');
+      return;
+    }
+  }
+
   const chequeos = [
     [municipioInput, !municipioInput.value.trim(), 'Por favor indique el municipio donde realiza la actividad.'],
     [zonaInput, !zonaInput.value.trim(), 'Por favor indique la zona o sector donde realiza la actividad.'],

@@ -211,7 +211,7 @@
         </div>
     </div>
 
-    {{-- ===== Gráficas: cuándo participan ===== --}}
+    <!-- ===== Gráficas: cuándo participan ===== 
     <div class="row g-3 mb-3">
         <div class="col-12 col-lg-8">
             <div class="card border-0 shadow-sm h-100"><div class="card-body p-4">
@@ -227,7 +227,7 @@
                 <div class="chart-box sm"><canvas id="g-semana" role="img" aria-label="Registros por día de la semana"></canvas></div>
             </div></div>
         </div>
-    </div>
+    </div>--}}-->
 
     {{-- ===== Gráficas: edad y avatar ===== --}}
     <div class="row g-3 mb-4">

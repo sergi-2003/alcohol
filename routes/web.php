@@ -15,6 +15,7 @@ use App\Http\Controllers\GraduacionController;
 use App\Http\Controllers\Admin\IndicadoresController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AvanceEscenaController;
+use App\Http\Controllers\Admin\ReportesController;
 /*
 |--------------------------------------------------------------------------
 | Página principal
@@ -89,8 +90,33 @@ Route::post('/aprende/reporte-resultados', [GraduacionController::class, 'report
 Route::post('/respuestas-escena', [RespuestaEscenaController::class, 'guardar'])
     ->name('respuestas.escena');
 
-Route::post('/aprende/reporte/resultados', [ReporteResultadosController::class, 'generar'])
-    ->name('aprende.reporte.resultados');
+    Route::prefix('admin')
+    ->middleware('auth')
+    ->group(function () {
+
+    // Dashboard
+    // ...
+
+    // Reportes
+    Route::get('/reportes', [
+        ReportesController::class,
+        'index'
+    ])->name('admin.reportes');
+
+    // Indicadores
+    Route::get('/indicadores', [
+        IndicadoresController::class,
+        'index'
+    ])->name('admin.indicadores');
+
+    // Estadísticas / mapa de calor
+    Route::get('/estadisticas', [
+        EstadisticasController::class,
+        'index'
+    ])->name('admin.estadisticas.index');
+
+    // ...
+});
     
 /*
 |--------------------------------------------------------------------------
