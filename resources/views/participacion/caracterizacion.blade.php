@@ -1247,7 +1247,7 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
   <div class="location-box">
     <div id="locationLoading" class="location-status loading">
       <div class="location-status-icon"><i class="bi bi-geo-alt location-loading"></i></div>
-      <div class="location-status-content"><strong>Detectando ubicación...</strong><span>El navegador solicitará permiso para conocer su ubicación aproximada.</span></div>
+      <div class="location-status-content"><strong>Dale click al boton para marcar tu ubicación...</strong><span>El navegador solicitará permiso para conocer su ubicación aproximada.</span></div>
     </div>
     <div id="locationDetected" class="location-status detected" style="display:none;">
       <div class="location-status-icon"><i class="bi bi-check-circle"></i></div>
@@ -1287,7 +1287,7 @@ h1,h2,h3{font-family:var(--titulos);font-weight:800;color:var(--azul);line-heigh
 
     <div class="location-actions">
       <button type="button" id="btnDetectarUbicacion" class="location-btn primary"><i class="bi bi-crosshair"></i> Detectar mi ubicación</button>
-      <button type="button" id="btnUbicacionManual" class="location-btn"><i class="bi bi-pencil"></i> Ingresar manualmente</button>
+     <!-- <button type="button" id="btnUbicacionManual" class="location-btn"><i class="bi bi-pencil"></i> Ingresar manualmente</button> -->
     </div>
 
     <div class="privacy-box">

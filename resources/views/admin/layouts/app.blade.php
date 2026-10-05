@@ -364,7 +364,7 @@
         <div class="sidebar-brand">
 
             <img
-                src="{{ asset('build/img/logo.WebP') }}"
+                src="{{ asset('build/img/logo.webp') }}"
                 alt="MI DECISIÓN"
             >
 

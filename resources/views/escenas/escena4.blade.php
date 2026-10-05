@@ -168,6 +168,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{-- CORRECCIÓN 1: token CSRF necesario para el POST a /avance-escena --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Prevenir y actuar | Aprende</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -730,6 +732,8 @@
         const POS_SIGUIENTE = {{ $posSiguiente }};
         const POS_ACTUAL = {{ $porcentajeRecorrido }};
         const CLAVE_QUIZ = @json($claveQuiz);
+        // CORRECCIÓN 2: URL del endpoint que guarda en la tabla avance_escenas
+        const URL_AVANCE = @json(url('/avance-escena'));
         const NOMBRE_MEDALLA = @json($nombreMedalla);
         let yendo = false;
 
@@ -854,6 +858,30 @@
             actualizar();
         }
 
+        // CORRECCIÓN 3: envía el resultado a la base de datos (AvanceEscenaController@guardar)
+        // El controlador usa updateOrInsert, así que llamarla varias veces no duplica filas.
+        function enviarAvance() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            return fetch(URL_AVANCE, {
+                method: 'POST',
+                credentials: 'same-origin',
+                keepalive: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': meta ? meta.content : ''
+                },
+                body: JSON.stringify({
+                    escena: ESCENA,
+                    aciertos: aciertos,
+                    total: tarjetas.length,
+                    respuestas: respuestasGuardadas
+                })
+            }).then(async (r) => {
+                if (!r.ok) console.error('No se guardó el avance de la escena ' + ESCENA, r.status, await r.text());
+            }).catch((e) => console.error('Error de red al guardar el avance', e));
+        }
+
         function finalizarCuestionario(restaurando) {
             const perfecto = aciertos === tarjetas.length;
             if (perfecto) xp += BONO;
@@ -866,6 +894,7 @@
 
             if (perfecto) medalChip.hidden = false;
             guardarProgreso();
+            enviarAvance(); // CORRECCIÓN 4: guardar en la base de datos al terminar el quiz
 
             // Al volver a la página no se repite la celebración
             if (!restaurando) {
@@ -926,6 +955,7 @@
             modalNext.disabled = true;
 
             guardarProgreso();
+            enviarAvance(); // reintento de seguridad antes de salir (no duplica filas)
             window.dispatchEvent(new CustomEvent('escena:completada', {
                 detail: { escena: ESCENA, xp: xp, aciertos: aciertos, medalla: aciertos === tarjetas.length, quizCompletado: true }
             }));
