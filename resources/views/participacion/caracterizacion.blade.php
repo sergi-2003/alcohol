@@ -1841,10 +1841,13 @@ document.addEventListener('keydown', e => {
 actualizarModoAnonimo();
 
 $('btnDetectarUbicacion').addEventListener('click', detectarUbicacion);
-$('btnUbicacionManual').addEventListener('click', () => {
-  mostrarEstado('manual'); metodoInput.value = 'manual';
-  municipioInput.disabled = false; zonaInput.disabled = false; municipioInput.focus();
-});
+const btnManual = $('btnUbicacionManual');
+if (btnManual) {
+  btnManual.addEventListener('click', () => {
+    mostrarEstado('manual'); metodoInput.value = 'manual';
+    municipioInput.disabled = false; zonaInput.disabled = false; municipioInput.focus();
+  });
+}
 
 [municipioInput, zonaInput].forEach(input => input.addEventListener('input', function () {
   if (this.value.trim() !== '' && metodoInput.value !== 'gps') metodoInput.value = 'manual';
